@@ -47,8 +47,4 @@ GitHub: https://github.com/Oloff2005/Human_Digital_twin
 - When someone visits your GitHub repo, they’ll see this as the project introduction.
 
 ---
-<<<<<<< HEAD
-=======
 
-Want me to help you make the `requirements.txt` next?
->>>>>>> main
