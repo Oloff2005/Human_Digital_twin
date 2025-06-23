@@ -1,0 +1,57 @@
+{
+    "heart_rate": [
+        "BrainController",
+        "CardiovascularTransport"
+    ],
+    "resting_heart_rate": [
+        "BrainController"
+    ],
+    "parasympathetic_tone": [
+        "BrainController"
+    ],
+    "sleep_score": [
+        "BrainController",
+        "SleepRegulationCenter"
+    ],
+    "sleep_duration": [
+        "SleepRegulationCenter"
+    ],
+    "steps": [
+        "BrainController",
+        "MuscleReactor"
+    ],
+    "activity_load": [
+        "MuscleReactor",
+        "LiverMetabolicRouter"
+    ],
+    "cardiorespiratory_fitness": [
+        "MuscleReactor"
+    ],
+    "calories_burned": [
+        "LiverMetabolicRouter"
+    ],
+    "respiration_rate": [
+        "LungReactor"
+    ],
+    "oxygen_saturation": [
+        "BrainController",
+        "LungReactor"
+    ],
+    "stress_score": [
+        "BrainController"
+    ],
+    "core_body_temperature": [
+        "BrainController",
+        "SkinThermoregulator"
+    ],
+    "skin_temperature": [
+        "SkinThermoregulator"
+    ],
+    "training_readiness": [
+        "BrainController"
+    ],
+    "recovery_time_estimate": [
+        "BrainController",
+        "SleepRegulationCenter"
+    ]
+}
