@@ -1,0 +1,49 @@
+GutReactor:
+  digestion_efficiency: 0.78
+  gastric_emptying_rate: 1.1
+  absorption_delay: 20
+
+LiverMetabolicRouter:
+  glycogen_capacity: 80.0
+  gluconeogenesis_rate: 1.0
+  insulin_sensitivity: 0.6
+  glucagon_sensitivity: 0.7
+
+MuscleEffector:
+  resting_atp_demand: 2.2
+  exercise_factor: 2.0
+  fat_utilization_rate: 0.3
+
+HeartCirculation:
+  cardiac_output: 4.5
+  hormone_transport_delay: 1.5
+
+BrainController:
+  cortisol_threshold: 0.8
+  stress_decay_rate: 0.03
+  circadian_baseline: 0.9
+
+SleepRegulationCenter:
+  melatonin_release_rate: 0.25
+  circadian_peak_time: 24
+  sleep_drive_gain: 1.0
+
+FatStorageReservoir:
+  storage_efficiency: 0.95
+  lipolysis_rate: 0.6
+
+PancreaticValve:
+  insulin_release_threshold: 5.8
+  glucagon_release_threshold: 3.6
+
+LungReactor:
+  oxygen_uptake_rate: 250
+  co2_exhale_rate: 200
+
+KidneyFilter:
+  urea_clearance: 45
+  fluid_reabsorption: 0.93
+
+SkinThermoregulator:
+  sweat_rate_max: 1.0
+  vasodilation_temp_threshold: 37.5
