@@ -1,4 +1,4 @@
-#!/Users/oloffosborne/Desktop/projects/Human_Digital_Twin/venv/bin/python3
+#!/Users/oloffosborne/Desktop/projects/Human_Digital_Twin/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

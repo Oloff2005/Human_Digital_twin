@@ -1,0 +1,35 @@
+[project]
+name = "human-digital-twin"
+version = "0.1.0"
+description = "A modular simulation engine for modeling human physiology using digital twin principles."
+authors = [
+  { name="Your Name", email="your.email@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["digital twin", "simulation", "physiology", "AI", "metabolism"]
+dependencies = [
+  "numpy",
+  "pydantic",
+  "matplotlib",
+  "streamlit",
+  "fastapi",
+  "uvicorn",
+  "scipy",
+  "pytest",
+  "pyyaml"
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/human-digital-twin"
+Documentation = "https://github.com/yourusername/human-digital-twin/wiki"
+
+[tool.setuptools.packages.find]
+where = ["hdt"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+[project.scripts]
+run_hdt = "hdt.cli:main"

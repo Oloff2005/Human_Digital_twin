@@ -1,5 +1,54 @@
+# Bytecode and cache
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.env/
+
+# IDE and OS files
+.vscode/
+.idea/
 .DS_Store
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+*.log
+
+# Python packaging
+.Python
+pip-wheel-metadata/
+*.manifest
+
+# Jupyter notebooks checkpoints (if you use them)
 .ipynb_checkpoints/
+
+# Environment & config
+.env
+*.yaml~
+*.json~
+
+# Application runtime
+*.sqlite3
+*.db
+*.pid
+
+# VSCode specific (optional)
+*.code-workspace
+
+# Ignore test coverage & profiling data
+.coverage
+htmlcov/
+.cache/
+pytest_cache/
+
+# Node/npm (if ever used with Streamlit frontend)
+node_modules/
+
+# Human Digital Twin exports or history
+logs/
+exports/

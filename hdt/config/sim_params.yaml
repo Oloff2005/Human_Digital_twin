@@ -1,0 +1,20 @@
+# hdt/config/sim_params.yaml
+
+# How many time steps the simulation runs
+simulation_steps: 100
+
+# Duration of each step (in minutes, for example)
+step_duration_minutes: 15
+
+# Output frequency (e.g., save state every X steps)
+output_interval: 10
+
+# Toggle verbose mode
+verbose: true
+
+# Optional: time format for circadian calculations (24h clock)
+start_hour: 6  # Simulate from 6:00 AM
+
+# Optional flags
+apply_noise: false
+record_history: true
