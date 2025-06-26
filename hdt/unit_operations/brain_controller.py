@@ -1,5 +1,3 @@
-# brain_controller.py
-
 class BrainController:
     def __init__(self, config):
         """
@@ -98,3 +96,12 @@ class BrainController:
         """
         if hasattr(self, state_name):
             setattr(self, state_name, value)
+
+    def step(self, muscle_signals, gut_signals, wearable_signals, time_of_day):
+        """
+        Execute one simulation step for the brain controller.
+
+        Returns:
+            dict: Signals for the next unit
+        """
+        return self.integrate_inputs(muscle_signals, gut_signals, wearable_signals, time_of_day)

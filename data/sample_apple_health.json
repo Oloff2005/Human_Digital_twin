@@ -14,5 +14,12 @@
   "core_body_temperature": 36.9,
   "skin_temperature": 33.0,
   "training_readiness": 88,
-  "recovery_time_estimate": 16
+  "recovery_time_estimate": 16,
+  "meal": {
+    "carbs": 50,
+    "fat": 20,
+    "protein": 30,
+    "fiber": 10,
+    "water": 300
+  }
 }

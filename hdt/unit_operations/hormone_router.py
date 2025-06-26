@@ -1,5 +1,3 @@
-# hormone_router.py
-
 class HormoneRouter:
     def __init__(self, dominance_rules=None):
         """
@@ -33,3 +31,15 @@ class HormoneRouter:
                     adjusted[suppressed] *= max(0.0, 1 - 0.5 * strength)
 
         return adjusted
+
+    def step(self, hormone_outputs):
+        """
+        Step method to fit simulation loop.
+
+        Args:
+            hormone_outputs (dict): raw hormones from BrainController
+
+        Returns:
+            dict: adjusted hormones after resolving dominance
+        """
+        return self.resolve(hormone_outputs)

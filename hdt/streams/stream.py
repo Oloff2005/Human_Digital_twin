@@ -1,4 +1,3 @@
-
 class Stream:
     """
     Represents the flow of materials or signals between unit operations.
@@ -33,3 +32,4 @@ class Stream:
 
     def __repr__(self):
         return f"<Stream {self.origin} → {self.destination} | {self.contents}>"
+

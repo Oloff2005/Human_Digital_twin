@@ -1,49 +1,67 @@
-GutReactor:
+brain:
+  cortisol_threshold: 0.7
+  stress_decay_rate: 0.05
+  circadian_baseline: 1.0
+
+gut:
   digestion_efficiency: 0.88
   gastric_emptying_rate: 1.5
   absorption_delay: 12
 
-LiverMetabolicRouter:
+colon:
+  fiber_fermentation_efficiency: 0.5
+  scfa_profile:
+    acetate: 0.6
+    propionate: 0.2
+    butyrate: 0.2
+  transit_time: 480
+
+liver:
   glycogen_capacity: 100.0
   gluconeogenesis_rate: 1.3
   insulin_sensitivity: 0.75
   glucagon_sensitivity: 0.85
 
-MuscleEffector:
+cardio:
+  cardiac_output: 5.2
+  hormone_transport_delay: 1.0
+
+kidney:
+  urea_clearance: 50
+  fluid_reabsorption: 0.95
+
+muscle:
   resting_atp_demand: 2.6
   exercise_factor: 3.5
   fat_utilization_rate: 0.5
 
-HeartCirculation:
-  cardiac_output: 5.2
-  hormone_transport_delay: 1.0
+hormones:
+  cortisol:
+    - insulin
+    - digestive_signal
+  glucagon:
+    - insulin
 
-BrainController:
-  cortisol_threshold: 0.7
-  stress_decay_rate: 0.05
-  circadian_baseline: 1.0
-
-SleepRegulationCenter:
-  melatonin_release_rate: 0.32
-  circadian_peak_time: 23
-  sleep_drive_gain: 1.2
-
-FatStorageReservoir:
-  storage_efficiency: 0.9
-  lipolysis_rate: 1.0
-
-PancreaticValve:
-  insulin_release_threshold: 5.4
-  glucagon_release_threshold: 4.0
-
-LungReactor:
+lungs:
   oxygen_uptake_rate: 280
   co2_exhale_rate: 220
 
-KidneyFilter:
-  urea_clearance: 50
-  fluid_reabsorption: 0.95
+storage:
+  max_glycogen: 400
+  max_fat: 12000
+  mobilization_rate: 60
+  initial_glycogen: 320
+  initial_fat: 8500
 
-SkinThermoregulator:
+pancreas:
+  insulin_release_threshold: 5.4
+  glucagon_release_threshold: 4.0
+
+skin:
   sweat_rate_max: 1.5
   vasodilation_temp_threshold: 37.3
+
+sleep:
+  melatonin_release_rate: 0.32
+  circadian_peak_time: 23
+  sleep_drive_gain: 1.2

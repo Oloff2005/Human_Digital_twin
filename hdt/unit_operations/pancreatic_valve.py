@@ -1,4 +1,3 @@
-
 class PancreaticValve:
     def __init__(self, config):
         """
@@ -43,3 +42,16 @@ class PancreaticValve:
             "insulin": round(insulin, 3),
             "glucagon": round(glucagon, 3)
         }
+
+    def step(self, glucose, rate_of_change=0.0):
+        """
+        Executes one simulation step for hormone regulation.
+
+        Args:
+            glucose (float): Current blood glucose level (mmol/L)
+            rate_of_change (float): Glucose trend (optional)
+
+        Returns:
+            dict: {'insulin': x, 'glucagon': y}
+        """
+        return self.regulate(glucose, rate_of_change)

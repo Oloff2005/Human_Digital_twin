@@ -1,4 +1,3 @@
-
 class SkinThermoregulator:
     def __init__(self, config):
         """
@@ -54,3 +53,12 @@ class SkinThermoregulator:
             "vasodilation": vasodilation,
             "heat_stress_score": round(stress_score, 2)
         }
+
+    def step(self, core_temp, ambient_temp, duration_hr=1.0, hormones=None):
+        """
+        Executes one simulation step for thermoregulation.
+
+        Returns:
+            dict: Thermoregulatory response
+        """
+        return self.regulate(core_temp, ambient_temp, duration_hr, hormones)

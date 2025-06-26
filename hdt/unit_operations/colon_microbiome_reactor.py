@@ -1,4 +1,3 @@
-
 class ColonMicrobiomeReactor:
     def __init__(self, config):
         """
@@ -53,3 +52,9 @@ class ColonMicrobiomeReactor:
             "fecal_waste": fecal_waste,
             "gut_brain_signals": gut_signals
         }
+
+    def step(self, fiber_input):
+        """
+        Wrapper for process_residue to maintain consistent unit operation API.
+        """
+        return self.process_residue(fiber_input)

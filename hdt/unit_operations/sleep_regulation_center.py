@@ -1,4 +1,3 @@
-
 class SleepRegulationCenter:
     def __init__(self, config):
         """
@@ -64,3 +63,12 @@ class SleepRegulationCenter:
             "sleep_drive": round(sleep_drive, 3),
             "sleep_signal": round(sleep_signal, 3)
         }
+
+    def step(self, current_hour, wearable_signals=None):
+        """
+        Simulation step interface for sleep regulation.
+
+        Returns:
+            dict: Sleep-related outputs
+        """
+        return self.compute_sleep_signals(current_hour, wearable_signals)

@@ -1,8 +1,9 @@
+# hdt/units/gut.py
 
 class GutReactor:
     def __init__(self, config):
         """
-        Simulates gastrointestinal processing of ingested food.
+        Simulates gastrointestinal processing of ingested food using ODEs or static digestion.
 
         Args:
             config (dict): {
@@ -12,43 +13,70 @@ class GutReactor:
             }
         """
         self.digestion_efficiency = config.get("digestion_efficiency", 0.9)
-        self.gastric_emptying_rate = config.get("gastric_emptying_rate", 1.5)
-        self.absorption_delay = config.get("absorption_delay", 10)
+        self.gastric_emptying_rate = config.get("gastric_emptying_rate", 1.5)  # g/min
+        self.absorption_delay = config.get("absorption_delay", 10)  # not used yet
+
+        # Internal state variables for ODE simulation
+        self.glucose = 0.0
+        self.fatty_acids = 0.0
+        self.amino_acids = 0.0
+        self.water = 0.0
+
+    def load_meal(self, meal_input, hormones=None):
+        """
+        Loads a meal into the gut for continuous simulation.
+        """
+        circadian_tone = hormones.get("circadian_tone", 1.0) if hormones else 1.0
+        cortisol = hormones.get("cortisol", 0.0) if hormones else 0.0
+        efficiency_modifier = circadian_tone * (1.0 - 0.3 * cortisol)
+        digestion_eff = self.digestion_efficiency * efficiency_modifier
+
+        self.glucose = meal_input.get("carbs", 0.0) * digestion_eff
+        self.fatty_acids = meal_input.get("fat", 0.0) * digestion_eff
+        self.amino_acids = meal_input.get("protein", 0.0) * digestion_eff
+        self.water = meal_input.get("water", 0.0) * digestion_eff
+        # Fiber remains residue — not modeled here
+
+    def get_state(self):
+        return {
+            "gut_glucose": self.glucose,
+            "gut_fatty_acids": self.fatty_acids,
+            "gut_amino_acids": self.amino_acids,
+            "gut_water": self.water
+        }
+
+    def set_state(self, state_dict):
+        self.glucose = state_dict["gut_glucose"]
+        self.fatty_acids = state_dict["gut_fatty_acids"]
+        self.amino_acids = state_dict["gut_amino_acids"]
+        self.water = state_dict["gut_water"]
+
+    def derivatives(self, t, state):
+        """
+        Simulates continuous absorption using first-order kinetics.
+        dX/dt = -k * X
+        """
+        k = self.gastric_emptying_rate / 100  # Normalize rate (can tune later)
+
+        return {
+            "gut_glucose": -k * state["gut_glucose"],
+            "gut_fatty_acids": -k * state["gut_fatty_acids"],
+            "gut_amino_acids": -k * state["gut_amino_acids"],
+            "gut_water": -k * state["gut_water"]
+        }
 
     def digest(self, meal_input, duration_min=60, hormones=None):
         """
-        Digests input meal based on efficiency, hormones, and circadian rhythm.
-
-        Args:
-            meal_input (dict): {
-                'carbs': g,
-                'fat': g,
-                'protein': g,
-                'fiber': g,
-                'water': mL
-            }
-            duration_min (int): digestion time
-            hormones (dict): {
-                - circadian_tone (0–1),
-                - cortisol (0–1)
-            }
-
-        Returns:
-            dict: {
-                'absorbed': {...},
-                'residue': {...}
-            }
+        Static digestion for backward compatibility or simple use.
         """
         circadian_tone = hormones.get("circadian_tone", 1.0) if hormones else 1.0
         cortisol = hormones.get("cortisol", 0.0) if hormones else 0.0
 
-        # Adjust digestion rate based on circadian and stress
         efficiency_modifier = circadian_tone * (1.0 - 0.3 * cortisol)
         digestion_eff = self.digestion_efficiency * efficiency_modifier
-
         max_digestion = self.gastric_emptying_rate * duration_min
 
-        absorbed = {}
+        absorbed = {"glucose": 0.0, "fatty_acids": 0.0, "amino_acids": 0.0, "water": 0.0}
         residue = {}
 
         for nutrient, total in meal_input.items():
@@ -60,10 +88,18 @@ class GutReactor:
             absorbed_amt = to_digest * digestion_eff
             residue_amt = total - absorbed_amt
 
-            absorbed[nutrient] = round(absorbed_amt, 2)
+            if nutrient == "carbs":
+                absorbed["glucose"] = round(absorbed_amt, 2)
+            elif nutrient == "fat":
+                absorbed["fatty_acids"] = round(absorbed_amt, 2)
+            elif nutrient == "protein":
+                absorbed["amino_acids"] = round(absorbed_amt, 2)
+            elif nutrient == "water":
+                absorbed["water"] = round(absorbed_amt, 2)
+
             residue[nutrient] = round(residue_amt, 2)
 
-        return {
-            "absorbed": absorbed,
-            "residue": residue
-        }
+        return {"absorbed": absorbed, "residue": residue}
+
+    def step(self, meal_input, duration_min=60, hormones=None):
+        return self.digest(meal_input, duration_min, hormones)

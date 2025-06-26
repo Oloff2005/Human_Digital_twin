@@ -1,4 +1,3 @@
-
 class CardiovascularTransport:
     def __init__(self, config):
         """
@@ -42,3 +41,9 @@ class CardiovascularTransport:
             "to_systemic": to_systemic,
             "delay_minutes": self.hormone_transport_delay
         }
+
+    def step(self, absorbed_nutrients):
+        """
+        Wrapper for distribute to maintain consistent unit operation API.
+        """
+        return self.distribute(absorbed_nutrients)

@@ -1,43 +1,74 @@
-
 class MuscleEffector:
     def __init__(self, config):
         """
         Simulates energy usage in muscle based on physical activity and hormone influence.
-
-        Args:
-            config (dict): {
-                - resting_atp_demand (mmol/min)
-                - exercise_factor (multiplier of ATP use)
-                - fat_utilization_rate (g/hr at rest)
-            }
         """
         self.resting_atp_demand = config.get("resting_atp_demand", 2.5)
         self.exercise_factor = config.get("exercise_factor", 4.0)
         self.fat_utilization_rate = config.get("fat_utilization_rate", 0.5)
 
+        self.glucose = 0.0
+        self.fat = 0.0
+        self.ketones = 0.0
+
+        self.activity_level = "rest"
+        self.hormones = {"insulin": 0.6, "cortisol": 0.2}
+
+    def load_inputs(self, substrate_pool, activity_level="rest", hormones=None):
+        """
+        Sets internal fuel stores (glucose, fat, ketones) and external influences.
+        """
+        self.glucose = substrate_pool.get("glucose", 0.0)
+        self.fat = substrate_pool.get("fat", 0.0)
+        self.ketones = substrate_pool.get("ketones", 0.0)
+        self.activity_level = activity_level
+        self.hormones = hormones or {"insulin": 0.6, "cortisol": 0.2}
+
+    def get_state(self):
+        return {
+            "muscle_glucose": self.glucose,
+            "muscle_fat": self.fat,
+            "muscle_ketones": self.ketones
+        }
+
+    def set_state(self, state_dict):
+        self.glucose = state_dict["muscle_glucose"]
+        self.fat = state_dict["muscle_fat"]
+        self.ketones = state_dict["muscle_ketones"]
+
+    def derivatives(self, t, state):
+        """
+        Calculates substrate usage rates based on current state and hormones.
+        """
+        factor = {
+            "rest": 1.0,
+            "moderate": 2.5,
+            "high": self.exercise_factor
+        }.get(self.activity_level, 1.0)
+
+        insulin = self.hormones.get("insulin", 0.6)
+        cortisol = self.hormones.get("cortisol", 0.2)
+
+        atp_demand = self.resting_atp_demand * factor * 1  # assuming 1-hour timestep
+        insulin_sensitivity = 1.0 + (insulin - 0.5) * 0.4
+        cortisol_penalty = 1.0 + cortisol * 0.3
+
+        glucose_use = min(state["muscle_glucose"], atp_demand * 0.5 / 10 * insulin_sensitivity / cortisol_penalty)
+        fat_use = min(state["muscle_fat"], atp_demand * 0.3 / 9 / cortisol_penalty)
+        ketone_use = min(state["muscle_ketones"], atp_demand * 0.2 / 8)
+
+        return {
+            "muscle_glucose": -glucose_use,
+            "muscle_fat": -fat_use,
+            "muscle_ketones": -ketone_use
+        }
+
+    def step(self, inputs, activity_level="rest", duration_min=60, hormones=None):
+        return self.metabolize(inputs, activity_level, duration_min, hormones)
+
     def metabolize(self, inputs, activity_level="rest", duration_min=60, hormones=None):
         """
-        Simulates substrate metabolism during muscle activity.
-
-        Args:
-            inputs (dict): {
-                - glucose (g)
-                - fat (g)
-                - ketones (optional, g)
-            }
-            activity_level (str): 'rest', 'moderate', 'high'
-            duration_min (int): Duration of effort
-            hormones (dict): {
-                - insulin (0–1)
-                - cortisol (0–1)
-            }
-
-        Returns:
-            dict: {
-                'substrate_used': {...},
-                'exhaust': {co2, h2o},
-                'to_brain': {fatigue_signal, lactate},
-            }
+        Optional discrete simulation mode (unchanged).
         """
         factor = {
             "rest": 1.0,
@@ -50,16 +81,13 @@ class MuscleEffector:
 
         atp_demand = self.resting_atp_demand * factor * duration_min
 
-        # Hormonal impact
         insulin_sensitivity = 1.0 + (insulin - 0.5) * 0.4
         cortisol_penalty = 1.0 + cortisol * 0.3
 
-        # Adjusted substrate usage
         glucose_use = min(inputs.get("glucose", 0), atp_demand * 0.5 / 10 * insulin_sensitivity / cortisol_penalty)
         fat_use = min(inputs.get("fat", 0), atp_demand * 0.3 / 9 / cortisol_penalty)
         ketone_use = min(inputs.get("ketones", 0), atp_demand * 0.2 / 8) if "ketones" in inputs else 0
 
-        # Waste calculation
         co2_output = glucose_use * 0.8 + fat_use * 1.4 + ketone_use * 1.2
         h2o_output = glucose_use * 0.6 + fat_use * 1.1 + ketone_use * 1.0
 

@@ -1,12 +1,24 @@
-
 class SignalNormalizer:
     def __init__(self):
-        # Define normalization rules or coefficients here if needed
+        """
+        Optionally initialize normalization parameters or scaling coefficients.
+        """
         pass
 
-    def normalize(self, parsed_signals):
+    def normalize(self, parsed_signals: dict) -> dict:
         """
-        Takes in parsed signals (dict by unit) and applies normalization.
+        Normalize all signal values by unit and signal name.
+
+        Args:
+            parsed_signals (dict): Output from InputParser with format:
+                {
+                    "BrainController": {"heart_rate": 72, ...},
+                    "MuscleReactor": {"steps": 10432, ...},
+                    ...
+                }
+
+        Returns:
+            dict: Normalized signals in the same structure
         """
         normalized_signals = {}
 
@@ -19,24 +31,33 @@ class SignalNormalizer:
 
         return normalized_signals
 
-    def _normalize_signal(self, signal, value):
+    def _normalize_signal(self, signal: str, value: float) -> float:
         """
-        Normalization rules per signal.
-        This is where you'd apply scaling, baseline adjustment, z-score, etc.
+        Apply normalization logic based on signal name.
+
+        You can scale values, clip outliers, or use model-specific ranges.
+
+        Args:
+            signal (str): The name of the input signal (e.g., "hrv")
+            value (float): The raw value
+
+        Returns:
+            float: Normalized value (typically 0–1 range)
         """
+        # Simple linear scaling based on typical expected ranges
         if signal == "heart_rate":
-            return value / 100.0  # normalize to 0–1 scale
-        elif signal == "sleep_score":
-            return value / 100.0
-        elif signal == "stress_score":
-            return value / 100.0
-        elif signal == "training_readiness":
-            return value / 100.0
-        elif signal == "oxygen_saturation":
             return value / 100.0
         elif signal == "resting_heart_rate":
             return value / 100.0
+        elif signal == "sleep_score":
+            return value / 100.0
+        elif signal == "training_readiness":
+            return value / 100.0
+        elif signal == "stress_score":
+            return value / 100.0
+        elif signal == "oxygen_saturation":
+            return value / 100.0
         elif signal == "parasympathetic_tone":
-            return value  # already normalized (0–1)
+            return value  # already 0–1
         else:
-            return value  # no normalization applied by default
+            return value  # fallback: no transformation

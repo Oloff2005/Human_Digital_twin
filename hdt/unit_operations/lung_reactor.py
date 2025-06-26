@@ -1,4 +1,3 @@
-
 class LungReactor:
     def __init__(self, config):
         """
@@ -37,3 +36,12 @@ class LungReactor:
             "co2_exhaled": co2_removed,
             "co2_remaining": co2_remaining
         }
+
+    def step(self, duration_min=1, co2_in=0):
+        """
+        Execute one simulation step for the lungs.
+
+        Returns:
+            dict: Gas exchange outputs
+        """
+        return self.exchange(duration_min, co2_in)

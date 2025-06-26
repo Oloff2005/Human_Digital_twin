@@ -1,4 +1,3 @@
-
 class KidneyReactor:
     def __init__(self, config):
         """
@@ -57,3 +56,12 @@ class KidneyReactor:
                 "water": retained_water
             }
         }
+
+    def step(self, blood_input, duration_min=60):
+        """
+        Wrapper to standardize simulation interface.
+
+        Returns:
+            dict: Output from renal processing
+        """
+        return self.filter(blood_input, duration_min)
