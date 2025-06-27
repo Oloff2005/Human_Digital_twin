@@ -22,6 +22,9 @@ class PancreaticValve(BaseUnit):
         # Inputs used by derivatives()
         self._blood_glucose = self.insulin_threshold
         self._rate_of_change = 0.0
+    
+        # Optional override for real-time control
+        self.override_inputs = None
         
     def reset(self):
         """Reset hormone levels and cached inputs."""
@@ -77,6 +80,12 @@ class PancreaticValve(BaseUnit):
         Returns:
             dict: {'insulin': x, 'glucagon': y}
         """
+        if self.override_inputs is not None:
+            o = self.override_inputs
+            glucose = o.get("glucose", glucose)
+            rate_of_change = o.get("rate_of_change", rate_of_change)
+            self.override_inputs = None
+
         outputs = self.regulate(glucose, rate_of_change)
         self.insulin_level = outputs["insulin"]
         self.glucagon_level = outputs["glucagon"]
@@ -94,6 +103,10 @@ class PancreaticValve(BaseUnit):
     def set_state(self, state_dict):
         self.insulin_level = state_dict["pancreatic_insulin"]
         self.glucagon_level = state_dict["pancreatic_glucagon"]
+        
+    def inject_override(self, inputs: dict):
+        """Store override inputs to be used on the next :meth:`step` call."""
+        self.override_inputs = inputs
 
     def derivatives(self, t, state):
         """Simple first-order approach toward regulated hormone levels."""

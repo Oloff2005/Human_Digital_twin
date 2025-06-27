@@ -23,6 +23,9 @@ class GutReactor(BaseUnit):
         self.amino_acids = 0.0
         self.water = 0.0
         
+        # Optional override for real-time control via the simulator
+        self.override_inputs = None
+
     def reset(self):
         """Reset internal nutrient pools."""
         self.glucose = 0.0
@@ -58,6 +61,10 @@ class GutReactor(BaseUnit):
         self.fatty_acids = state_dict["gut_fatty_acids"]
         self.amino_acids = state_dict["gut_amino_acids"]
         self.water = state_dict["gut_water"]
+
+    def inject_override(self, inputs: dict):
+        """Store override inputs to be used on the next :meth:`step` call."""
+        self.override_inputs = inputs
 
     def derivatives(self, t, state):
         """
@@ -110,4 +117,11 @@ class GutReactor(BaseUnit):
         return {"absorbed": absorbed, "residue": residue}
 
     def step(self, meal_input, duration_min=60, hormones=None):
+        if self.override_inputs is not None:
+            o = self.override_inputs
+            meal_input = o.get("meal_input", meal_input)
+            duration_min = o.get("duration_min", duration_min)
+            hormones = o.get("hormones", hormones)
+            self.override_inputs = None
+
         return self.digest(meal_input, duration_min, hormones)

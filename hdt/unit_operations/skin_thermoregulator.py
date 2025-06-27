@@ -35,7 +35,10 @@ class SkinThermoregulator(BaseUnit):
         self._core_temp = self.vasodilation_temp_threshold
         self._ambient_temp = 25.0
         self._cortisol = 0.0
-        
+    
+        # Optional override for real-time control
+        self.override_inputs = None
+
     def reset(self):
         """Reset cumulative sweat and heat loss."""
         self.total_sweat = 0.0
@@ -82,6 +85,13 @@ class SkinThermoregulator(BaseUnit):
         dict
             ``{"sweat_rate": L/hr, "heat_dissipated": kcal}``
         """
+        if self.override_inputs is not None:
+            o = self.override_inputs
+            core_temp = o.get("core_temp", core_temp)
+            ambient_temp = o.get("ambient_temp", ambient_temp)
+            cortisol = o.get("cortisol", cortisol)
+            duration_hr = o.get("duration_hr", duration_hr)
+            self.override_inputs = None
 
         # Store inputs for the derivative interface
         self._core_temp = core_temp
@@ -118,6 +128,10 @@ class SkinThermoregulator(BaseUnit):
     def set_state(self, state_dict):
         self.total_sweat = state_dict["skin_sweat_total"]
         self.total_heat_loss = state_dict["skin_heat_loss_total"]
+        
+    def inject_override(self, inputs: dict):
+        """Store override inputs to be used on the next :meth:`step` call."""
+        self.override_inputs = inputs
 
     def derivatives(self, t, state):
         """Derivatives for ODE integration of cumulative values."""

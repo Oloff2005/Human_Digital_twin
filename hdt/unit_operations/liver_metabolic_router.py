@@ -27,6 +27,9 @@ class LiverMetabolicRouter(BaseUnit):
         self._incoming_glucose = 0.0
         self._insulin = 0.5
         self._glucagon = 0.5
+
+        # Optional override for real-time control
+        self.override_inputs = None
     def reset(self):
         """Reset internal liver state."""
         self.liver_glucose = 0.0
@@ -53,6 +56,10 @@ class LiverMetabolicRouter(BaseUnit):
     def set_state(self, state_dict):
         self.liver_glucose = state_dict["liver_glucose"]
         self.current_glycogen = state_dict["liver_glycogen"]
+
+    def inject_override(self, inputs: dict):
+        """Store override inputs to be used on the next :meth:`step` call."""
+        self.override_inputs = inputs
 
     def derivatives(self, t, state):
         """
@@ -127,4 +134,12 @@ class LiverMetabolicRouter(BaseUnit):
         }
 
     def step(self, portal_input, microbiome_input=None, mobilized_reserves=None, signals=None):
+        if self.override_inputs is not None:
+            o = self.override_inputs
+            portal_input = o.get("portal_input", portal_input)
+            microbiome_input = o.get("microbiome_input", microbiome_input)
+            mobilized_reserves = o.get("mobilized_reserves", mobilized_reserves)
+            signals = o.get("signals", signals)
+            self.override_inputs = None
+
         return self.route(portal_input, microbiome_input, mobilized_reserves, signals)

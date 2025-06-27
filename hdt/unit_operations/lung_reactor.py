@@ -26,6 +26,9 @@ class LungReactor(BaseUnit):
         self.co2_pool = 0.0
         self._co2_in_rate = 0.0  # rate of CO₂ coming from tissues (mL/min)
 
+    # Optional override for real-time control
+        self.override_inputs = None
+
     def reset(self):
         """Reset accumulated CO₂ pool."""
         self.co2_pool = 0.0
@@ -55,6 +58,12 @@ class LungReactor(BaseUnit):
         Returns:
             dict: Gas exchange outputs
         """
+        if self.override_inputs is not None:
+            o = self.override_inputs
+            duration_min = o.get("duration_min", duration_min)
+            co2_in = o.get("co2_in", co2_in)
+            self.override_inputs = None
+
         return self.exchange(duration_min, co2_in)
 
     # ------------------------------------------------------------------
@@ -64,6 +73,10 @@ class LungReactor(BaseUnit):
 
     def set_state(self, state_dict):
         self.co2_pool = state_dict["lung_co2"]
+
+    def inject_override(self, inputs: dict):
+        """Store override inputs to be used on the next :meth:`step` call."""
+        self.override_inputs = inputs
 
     def derivatives(self, t, state):
         """Rate of change of CO₂ in the lung pool."""

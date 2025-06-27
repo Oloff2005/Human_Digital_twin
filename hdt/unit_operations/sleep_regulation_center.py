@@ -16,6 +16,9 @@ class SleepRegulationCenter(BaseUnit):
 
         self._override = None
 
+        # Optional override for real-time control
+        self.override_inputs = None
+
     def reset(self):
         """Reset sleep drive and overrides."""
         self.sleep_drive = 0.5
@@ -49,6 +52,9 @@ class SleepRegulationCenter(BaseUnit):
     def clear_override(self):
         self._override = None
 
+    def inject_override(self, inputs: dict):
+        """Store override inputs for the next :meth:`step` call."""
+        self.override_inputs = inputs
     # ------------------------------------------------------------------
     def _calculate_melatonin(self, circadian_phase):
         phase = circadian_phase % 1.0
@@ -70,6 +76,13 @@ class SleepRegulationCenter(BaseUnit):
         self.sleep_drive = state_dict.get("sleep_drive", self.sleep_drive)
 
     def step(self, circadian_phase, sleep_quality=1.0, cortisol=0.0):
+        if self.override_inputs is not None:
+            o = self.override_inputs
+            circadian_phase = o.get("circadian_phase", circadian_phase)
+            sleep_quality = o.get("sleep_quality", sleep_quality)
+            cortisol = o.get("cortisol", cortisol)
+            self.override_inputs = None
+
         melatonin = self._calculate_melatonin(circadian_phase)
 
         if self._override is not None:

@@ -1,4 +1,4 @@
-import numpy as np
+import math
 from utils.logging_utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -35,7 +35,7 @@ class SignalNormalizer:
                 if value is None:
                     logger.warning("%s.%s is None; skipping", unit, signal)
                     continue
-                if isinstance(value, (int, float)) and np.isnan(value):
+                if isinstance(value, (int, float)) and math.isnan(value):
                     logger.warning("%s.%s is NaN; skipping", unit, signal)
                     continue
                 normalized_value = self._normalize_signal(signal, value)

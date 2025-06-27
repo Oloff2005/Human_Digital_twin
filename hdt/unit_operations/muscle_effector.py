@@ -16,7 +16,10 @@ class MuscleEffector(BaseUnit):
 
         self.activity_level = "rest"
         self.hormones = {"insulin": 0.6, "cortisol": 0.2}
-        
+    
+        # Optional override for simulator injections
+        self.override_inputs = None
+
     def reset(self):
         """Reset internal substrate pools and settings."""
         self.glucose = 0.0
@@ -47,6 +50,10 @@ class MuscleEffector(BaseUnit):
         self.fat = state_dict["muscle_fat"]
         self.ketones = state_dict["muscle_ketones"]
 
+    def inject_override(self, inputs: dict):
+        """Store override inputs to be used on the next :meth:`step` call."""
+        self.override_inputs = inputs
+
     def derivatives(self, t, state):
         """
         Calculates substrate usage rates based on current state and hormones.
@@ -75,6 +82,14 @@ class MuscleEffector(BaseUnit):
         }
 
     def step(self, inputs, activity_level="rest", duration_min=60, hormones=None):
+        if self.override_inputs is not None:
+            o = self.override_inputs
+            inputs = o.get("inputs", inputs)
+            activity_level = o.get("activity_level", activity_level)
+            duration_min = o.get("duration_min", duration_min)
+            hormones = o.get("hormones", hormones)
+            self.override_inputs = None
+
         return self.metabolize(inputs, activity_level, duration_min, hormones)
 
     def metabolize(self, inputs, activity_level="rest", duration_min=60, hormones=None):

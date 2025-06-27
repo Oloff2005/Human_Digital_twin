@@ -1,5 +1,5 @@
 import json
-import numpy as np
+import math
 from utils.logging_utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -50,7 +50,7 @@ class InputParser:
              if value is None:
                 logger.warning("%s missing or None; skipping", signal)
                 continue
-             if isinstance(value, (int, float)) and np.isnan(value):
+             if isinstance(value, (int, float)) and math.isnan(value):
                 logger.warning("%s is NaN; skipping", signal)
                 continue
              for target in targets:
