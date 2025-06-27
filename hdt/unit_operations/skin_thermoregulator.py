@@ -1,64 +1,129 @@
 class SkinThermoregulator:
+    """Simple model of skin thermoregulation.
+
+    This class offers a lightweight representation of sweating and heat
+    dissipation.  It exposes an ``ODE`` friendly interface while maintaining
+    the old :py:meth:`regulate` method for backward compatibility with the
+    existing simulator and tests.
+    """
+
     def __init__(self, config):
-        """
-        Simulates temperature regulation via sweating and vasodilation.
+        """Initialize the regulator with optional tuning parameters."""
 
-        Args:
-            config (dict): {
-                - sweat_rate_max (L/hr)
-                - vasodilation_temp_threshold (°C)
-            }
-        """
+        # Maximum achievable sweat rate in L/hr
         self.sweat_rate_max = config.get("sweat_rate_max", 1.8)
-        self.vasodilation_temp_threshold = config.get("vasodilation_temp_threshold", 37.2)
 
+        # Core temperature at which vasodilation/sweating begins (°C)
+        self.vasodilation_temp_threshold = config.get(
+            "vasodilation_temp_threshold", 37.2
+        )
+
+        # Amount of heat removed per litre of sweat (kcal)
+        self.heat_loss_per_l = config.get("heat_loss_per_l", 580.0)
+
+        # Coefficient for dry heat loss (kcal/hr per °C difference)
+        self.conduction_coeff = config.get("conduction_coeff", 10.0)
+
+        # Cumulative state variables for ODE integration
+        self.total_sweat = 0.0  # litres
+        self.total_heat_loss = 0.0  # kcal
+
+        # Inputs used by ``derivatives``
+        self._core_temp = self.vasodilation_temp_threshold
+        self._ambient_temp = 25.0
+        self._cortisol = 0.0
+
+    # ------------------------------------------------------------------
+    # Discrete helper used by the simulator
     def regulate(self, core_temp, ambient_temp, duration_hr=1.0, hormones=None):
-        """
-        Regulates body heat via sweating and skin blood flow.
+        """Backward compatible wrapper around :meth:`step`."""
 
-        Args:
-            core_temp (float): Core body temperature in °C
-            ambient_temp (float): Environmental temperature in °C
-            duration_hr (float): Duration in hours
-            hormones (dict): {
-                - cortisol (0–1) (optional): stress affects sweating
-            }
-
-        Returns:
-            dict: {
-                'sweat_loss': L,
-                'vasodilation': bool,
-                'heat_stress_score': 0–1
-            }
-        """
         cortisol = hormones.get("cortisol", 0.0) if hormones else 0.0
+        out = self.step(core_temp, ambient_temp, cortisol, duration_hr)
 
-        # Vasodilation logic
-        vasodilation = core_temp >= self.vasodilation_temp_threshold
-
-        # Sweating logic: increase with temp, decrease under stress
         temp_diff = max(0, core_temp - self.vasodilation_temp_threshold)
-        sweat_rate = min(self.sweat_rate_max, temp_diff * 1.2)  # L/hr
-
-        # Cortisol (stress) reduces sweat output
-        sweat_rate *= (1.0 - 0.3 * cortisol)
-
-        sweat_loss = sweat_rate * duration_hr
-
-        # Heat stress score (0–1)
+        vasodilation = core_temp >= self.vasodilation_temp_threshold
         stress_score = min(1.0, temp_diff / 3.0 + 0.2 * cortisol)
 
         return {
-            "sweat_loss": round(sweat_loss, 2),
+            "sweat_loss": round(out["sweat_rate"] * duration_hr, 2),
             "vasodilation": vasodilation,
-            "heat_stress_score": round(stress_score, 2)
+            "heat_stress_score": round(stress_score, 2),
         }
 
-    def step(self, core_temp, ambient_temp, duration_hr=1.0, hormones=None):
-        """
-        Executes one simulation step for thermoregulation.
+    # ------------------------------------------------------------------
+    def step(self, core_temp, ambient_temp, cortisol=0.0, duration_hr=1.0):
+        """Execute a discrete thermoregulation step.
 
-        Returns:
-            dict: Thermoregulatory response
+        Parameters
+        ----------
+        core_temp : float
+            Current core body temperature (°C).
+        ambient_temp : float
+            Environmental temperature (°C).
+        cortisol : float, optional
+            Stress hormone level on a 0–1 scale.
+        duration_hr : float, optional
+            Duration of the step in hours.
+
+        Returns
+        -------
+        dict
+            ``{"sweat_rate": L/hr, "heat_dissipated": kcal}``
         """
-        return self.regulate(core_temp, ambient_temp, duration_hr, hormones)
+
+        # Store inputs for the derivative interface
+        self._core_temp = core_temp
+        self._ambient_temp = ambient_temp
+        self._cortisol = cortisol
+
+        # Sweating model
+        temp_diff = max(0.0, core_temp - self.vasodilation_temp_threshold)
+        sweat_rate = min(self.sweat_rate_max, temp_diff * 1.2)
+        sweat_rate *= 1.0 - 0.3 * cortisol
+
+        # Heat loss via sweat evaporation + dry conduction
+        heat_from_sweat = sweat_rate * self.heat_loss_per_l
+        dry_loss = max(0.0, core_temp - ambient_temp) * self.conduction_coeff
+        heat_loss_rate = heat_from_sweat + dry_loss
+
+        # Update cumulative state
+        self.total_sweat += sweat_rate * duration_hr
+        self.total_heat_loss += heat_loss_rate * duration_hr
+
+        return {
+            "sweat_rate": round(sweat_rate, 3),
+            "heat_dissipated": round(heat_loss_rate * duration_hr, 2),
+        }
+
+    # ------------------------------------------------------------------
+    # ODE compatibility methods
+    def get_state(self):
+        return {
+            "skin_sweat_total": self.total_sweat,
+            "skin_heat_loss_total": self.total_heat_loss,
+        }
+
+    def set_state(self, state_dict):
+        self.total_sweat = state_dict["skin_sweat_total"]
+        self.total_heat_loss = state_dict["skin_heat_loss_total"]
+
+    def derivatives(self, t, state):
+        """Derivatives for ODE integration of cumulative values."""
+
+        core_temp = self._core_temp
+        ambient_temp = self._ambient_temp
+        cortisol = self._cortisol
+
+        temp_diff = max(0.0, core_temp - self.vasodilation_temp_threshold)
+        sweat_rate = min(self.sweat_rate_max, temp_diff * 1.2)
+        sweat_rate *= 1.0 - 0.3 * cortisol
+
+        heat_from_sweat = sweat_rate * self.heat_loss_per_l
+        dry_loss = max(0.0, core_temp - ambient_temp) * self.conduction_coeff
+        heat_loss_rate = heat_from_sweat + dry_loss
+
+        return {
+            "skin_sweat_total": sweat_rate,
+            "skin_heat_loss_total": heat_loss_rate,
+        }
