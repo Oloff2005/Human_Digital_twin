@@ -9,16 +9,17 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config
 from hdt.inputs.input_parser import InputParser
 from hdt.inputs.signal_normalizer import SignalNormalizer
 
-ROOT = Path(__file__).resolve().parent
-CONFIG_PATH = ROOT / "hdt" / "config" / "units_config_active.yaml"
-MAPPING_PATH = ROOT / "hdt" / "config" / "wearable_mapping.json"
-SAMPLE_INPUT = ROOT / "data" / "sample_inputs.json"
+PACKAGE_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = PACKAGE_ROOT.parent
+
+CONFIG_PATH = PACKAGE_ROOT / "config" / "units_config_active.yaml"
+MAPPING_PATH = PACKAGE_ROOT / "config" / "wearable_mapping.json"
+SAMPLE_INPUT = PROJECT_ROOT / "data" / "sample_inputs.json"
 
 # ---------------------------------------------------------------------------
 # Session initialization
