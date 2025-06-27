@@ -5,4 +5,5 @@ uvicorn
 pyyaml
 seaborn==0.13.2      
 matplotlib==3.10.3
+pandas
 
