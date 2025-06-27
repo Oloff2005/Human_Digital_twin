@@ -9,8 +9,10 @@ from hdt.recommender.recommender import Recommender, threshold_rule_match
 
 class TestRecommender(unittest.TestCase):
     def setUp(self):
-        rules_path = os.path.join(os.path.dirname(__file__), "..", "hdt", "recommender", "rules.yaml")
-        self.rec = Recommender(rules_path)
+        rules_path = os.path.join(
+            os.path.dirname(__file__), "..", "hdt", "recommender", "rules.yaml"
+        )
+        self.rec = Recommender(rules_path, rule_version="version_A")
 
     def test_recommend_structure(self):
         state = {"Liver": {"glucose": 160}}
@@ -19,6 +21,15 @@ class TestRecommender(unittest.TestCase):
         for item in output:
             self.assertIsInstance(item, str)
         self.assertIn("Consider reducing sugar intake", output)
+    
+    def test_version_b(self):
+        rules_path = os.path.join(
+            os.path.dirname(__file__), "..", "hdt", "recommender", "rules.yaml"
+        )
+        rec_b = Recommender(rules_path, rule_version="version_B")
+        out = rec_b.recommend({"Liver": {"glucose": 160}})
+        self.assertIn("Limit sugar intake", out)
+        self.assertEqual(rec_b.get_version(), "version_B")
         
     def test_threshold_rule_match(self):
         path = os.path.join(

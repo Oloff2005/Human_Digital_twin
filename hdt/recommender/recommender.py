@@ -3,46 +3,86 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     yaml = None
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from hdt.config_loader import _parse_scalar
 
 
-def _simple_rules_load(path: str) -> List[Dict[str, Any]]:
-    rules: List[Dict[str, Any]] = []
-    current: Dict[str, Any] = {}
+def _simple_rules_load(path: str) -> Union[List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]]:
+    """Very small loader supporting lists of rule dicts optionally grouped by version."""
+
+    versions: Dict[str, List[Dict[str, Any]]] = {}
+    root_rules: List[Dict[str, Any]] = []
+    current_rule: Dict[str, Any] = {}
+    current_target: List[Dict[str, Any]] = root_rules
+
     with open(path, "r", encoding="utf-8") as f:
         for raw in f:
             line = raw.split("#", 1)[0].rstrip("\n")
             if not line.strip():
                 continue
-            if line.startswith("- "):
-                if current:
-                    rules.append(current)
-                current = {}
-                line = line[2:].strip()
-                if line:
-                    if ":" in line:
-                        key, val = line.split(":", 1)
-                        current[key.strip()] = _parse_scalar(val.strip().strip('"').strip("'"))
+
+            indent = len(raw) - len(raw.lstrip(" "))
+            content = line.strip()
+
+            if indent == 0 and content.endswith(":") and not content.startswith("-"):
+                if current_rule:
+                    current_target.append(current_rule)
+                    current_rule = {}
+                version = content[:-1]
+                current_target = versions.setdefault(version, [])
                 continue
-            if ":" in line:
-                key, val = line.split(":", 1)
-                current[key.strip()] = _parse_scalar(val.strip().strip('"').strip("'"))
-    if current:
-        rules.append(current)
-    return rules
+
+            if content.startswith("- "):
+                if current_rule:
+                    current_target.append(current_rule)
+                current_rule = {}
+                content = content[2:].strip()
+                if content and ":" in content:
+                    key, val = content.split(":", 1)
+                    current_rule[key.strip()] = _parse_scalar(val.strip().strip('"').strip("'"))
+                continue
+
+            if ":" in content:
+                key, val = content.split(":", 1)
+                current_rule[key.strip()] = _parse_scalar(val.strip().strip('"').strip("'"))
+
+    if current_rule:
+        current_target.append(current_rule)
+
+    if versions:
+        if root_rules:
+            versions["default"] = root_rules
+        return versions
+    return root_rules
 
 
 class Recommender:
-    """Simple rule-based recommender."""
+    """Simple rule-based recommender with optional A/B rule versions."""
 
-    def __init__(self, rules_path: str) -> None:
+    def __init__(self, rules_path: str, rule_version: str | None = None) -> None:
+        self.rule_version = rule_version
+
         if yaml is not None:
             with open(rules_path, "r", encoding="utf-8") as f:
-                self.rules: List[Dict[str, Any]] = yaml.safe_load(f) or []
+                data: Union[List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]] = yaml.safe_load(f) or {}
         else:
-            self.rules = _simple_rules_load(rules_path)
+            data = _simple_rules_load(rules_path)
+
+        if isinstance(data, list):
+            self.rules = data
+        elif isinstance(data, dict):
+            if self.rule_version is None:
+                if len(data) == 1:
+                    self.rule_version, self.rules = next(iter(data.items()))
+                else:
+                    raise ValueError("rule_version must be specified when multiple versions are present")
+            else:
+                if self.rule_version not in data:
+                    raise ValueError(f"Unknown rule_version '{self.rule_version}'")
+                self.rules = data[self.rule_version]
+        else:
+            self.rules = []
 
     def recommend(self, state: Dict[str, Any]) -> List[str]:
         """Return a list of suggestions based on the provided ``state``."""
@@ -58,12 +98,16 @@ class Recommender:
                         suggestions.append(str(suggestion))
             except Exception:
                 continue
-        
+
         return suggestions
 
     def get_rules(self) -> List[Dict[str, Any]]:
         """Return the currently loaded rule set."""
         return self.rules
+
+    def get_version(self) -> str | None:
+        """Return the active rule version."""
+        return self.rule_version
 
 
 def threshold_rule_match(values: Dict[str, float], rules_path: str) -> List[str]:
