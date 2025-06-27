@@ -1,8 +1,33 @@
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
+
 from hdt.core.time_manager import TimeManager
+from hdt.engine.solver import ODESolver
+from hdt.inputs.input_parser import InputParser
+from hdt.inputs.signal_normalizer import SignalNormalizer
+from hdt.streams.stream import Stream
+from hdt.streams.stream_map import STREAM_MAP
 
 
 class Simulator:
-    def __init__(self, config, initial_inputs, verbose=False, start_minute=0):
+    """Coordinate unit operations and manage time progression."""
+
+    def __init__(
+        self,
+        config: Dict[str, Any],
+        wearable_inputs: Optional[Dict[str, Any]] = None,
+        use_ode: bool = False,
+        verbose: bool = False,
+    ) -> None:
+        self.verbose = verbose
+        self.use_ode = use_ode
+        self.time = TimeManager()
+        self.history: List[Dict[str, Any]] = []
+
+        # ------------------------------------------------------------------
+        # Initialize unit operations
+        # ------------------------------------------------------------------
         from hdt.unit_operations.brain_controller import BrainController
         from hdt.unit_operations.gut_reactor import GutReactor
         from hdt.unit_operations.colon_microbiome_reactor import ColonMicrobiomeReactor
@@ -16,127 +41,158 @@ class Simulator:
         from hdt.unit_operations.pancreatic_valve import PancreaticValve
         from hdt.unit_operations.skin_thermoregulator import SkinThermoregulator
         from hdt.unit_operations.sleep_regulation_center import SleepRegulationCenter
-        from hdt.streams.stream import Stream
 
-        self.units = {
-            "brain": BrainController(config["brain"]),
-            "gut": GutReactor(config["gut"]),
-            "colon": ColonMicrobiomeReactor(config["colon"]),
-            "liver": LiverMetabolicRouter(config["liver"]),
-            "cardio": CardiovascularTransport(config["cardio"]),
-            "kidney": KidneyReactor(config["kidney"]),
-            "muscle": MuscleEffector(config["muscle"]),
-            "hormones": HormoneRouter(config.get("hormones", {})),
-            "lungs": LungReactor(**config["lungs"]),
-            "storage": StorageUnit(config["storage"]),
-            "pancreas": PancreaticValve(config["pancreas"]),
-            "skin": SkinThermoregulator(config["skin"]),
-            "sleep": SleepRegulationCenter(config["sleep"])
+        self.units: Dict[str, Any] = {
+            "BrainController": BrainController(config.get("brain", {})),
+            "Gut": GutReactor(config.get("gut", {})),
+            "Colon": ColonMicrobiomeReactor(config.get("colon", {})),
+            "Liver": LiverMetabolicRouter(config.get("liver", {})),
+            "CardiovascularTransport": CardiovascularTransport(config.get("cardio", {})),
+            "Kidney": KidneyReactor(config.get("kidney", {})),
+            "Muscle": MuscleEffector(config.get("muscle", {})),
+            "HormoneRouter": HormoneRouter(config.get("hormones", {})),
+            "Lungs": LungReactor(config.get("lungs", {})),
+            "Storage": StorageUnit(config.get("storage", {})),
+            "PancreaticValve": PancreaticValve(config.get("pancreas", {})),
+            "Skin": SkinThermoregulator(config.get("skin", {})),
+            "SleepRegulationCenter": SleepRegulationCenter(config.get("sleep", {})),
         }
 
-        self.initial_inputs = initial_inputs
-        self.clock = TimeManager(start_minute)
-        self.time_step = 60  # minutes per simulation step
-        self.history = []
-        self.verbose = verbose
+        # Wearable input handling
+        parser = InputParser("hdt/config/wearable_mapping.json")
+        normalizer = SignalNormalizer()
+        if wearable_inputs is not None:
+            parsed = parser.parse(wearable_inputs)
+            self.signals = normalizer.normalize(parsed)
+        else:
+            self.signals = {}
 
-    def step(self):
-        inputs = self.initial_inputs.copy()
-        current = self.clock.get_time_state()
+        # Stream map connections
+        self.streams: Dict[tuple, Stream] = {
+            (conn.origin, conn.destination): Stream(conn.origin, conn.destination)
+            for conn in STREAM_MAP
+        }
 
-        brain_out = self.units["brain"].step(
-            muscle_signals=inputs.get("muscle_signals", {}),
-            gut_signals=inputs.get("gut_signals", {}),
-            wearable_signals=inputs.get("wearable_signals", {}),
-            time_of_day=current["hour"]
-        )
+        # Optional ODE solver setup
+        self.solver: Optional[ODESolver] = None
+        if self.use_ode:
+            ode_units = [u for u in self.units.values() if hasattr(u, "derivatives")]
+            self.solver = ODESolver(ode_units)
+            self.state: Dict[str, float] = {}
+            for unit in ode_units:
+                self.state.update(unit.get_state())
 
-        gut_out = self.units["gut"].step(
-            meal_input=inputs.get("meal", {}),
-            duration_min=self.time_step,
-            hormones=brain_out
-        )
+    # ------------------------------------------------------------------
+    # Simulation helpers
+    # ------------------------------------------------------------------
+    def _record_state(self) -> None:
+        snapshot = {"minute": self.time.minute}
+        for name, unit in self.units.items():
+            if hasattr(unit, "get_state"):
+                snapshot[name] = unit.get_state()
+        self.history.append(snapshot)
 
-        colon_out = self.units["colon"].step(gut_out["residue"].get("fiber", 0))
+    # ------------------------------------------------------------------
+    def step(self, external_inputs: Optional[Dict[str, Any]] = None) -> None:
+        external_inputs = external_inputs or {}
 
-        hormone_out = self.units["hormones"].resolve(brain_out)
+        if self.use_ode and self.solver is not None:
+            start = self.time.minute
+            result = self.solver.solve(
+                t_span=(start, start + 1),
+                y0=self.state,
+                t_eval=[start, start + 1],
+            )
+            self.state = result[-1]["state"]
+            for unit in self.solver.units:
+                unit_state = {k: self.state[k] for k in unit.get_state().keys()}
+                unit.set_state(unit_state)
+        else:
+            # ------------------------------------------------------------------
+            # Discrete stepping sequence mirroring physiological flow
+            # ------------------------------------------------------------------
+            brain_out = self.units["BrainController"].step(
+                muscle_signals=external_inputs.get("muscle_signals", {}),
+                gut_signals=external_inputs.get("gut_signals", {}),
+                wearable_signals=self.signals.get("BrainController", {}),
+                time_of_day=self.time.hour,
+            )
+            self.streams[("BrainController", "HormoneRouter")].push(brain_out, self.time.minute)
 
-        cardio_out = self.units["cardio"].step(gut_out["absorbed"])
+            hr_inputs = {}
+            for payload in self.streams[("BrainController", "HormoneRouter")].step(self.time.minute):
+                if isinstance(payload, dict):
+                    hr_inputs.update(payload)
+            # HormoneRouter expects plain hormone signals only
+            nested = hr_inputs.pop("hormone_signals", {})
+            hr_inputs.update({k: v for k, v in nested.items() if isinstance(v, (int, float))})
+            hr_inputs = {k: v for k, v in hr_inputs.items() if isinstance(v, (int, float))}
+            hormone_out = self.units["HormoneRouter"].step(hr_inputs)
+            for conn in STREAM_MAP:
+                if conn.origin == "HormoneRouter":
+                    self.streams[(conn.origin, conn.destination)].push(hormone_out, self.time.minute)
 
-        mobilized = self.units["storage"].mobilize(
-            signal_strength=hormone_out["glucagon"], duration_hr=1
-        )
+            gut_inputs = external_inputs.get("meal", {})
+            gut_out = self.units["Gut"].step(meal_input=gut_inputs, duration_min=60, hormones=hormone_out)
+            self.streams[("Gut", "CardiovascularTransport")].push(gut_out["absorbed"], self.time.minute)
 
-        liver_out = self.units["liver"].route(
-            portal_input=cardio_out["to_liver"],
-            microbiome_input=colon_out["scfa_output"],
-            mobilized_reserves=mobilized["mobilized"],
-            signals=hormone_out
-        )
+            colon_out = self.units["Colon"].step(gut_out["residue"].get("fiber", 0))
 
-        muscle_out = self.units["muscle"].metabolize(
-            inputs=liver_out["to_muscle_aerobic"],
-            activity_level=inputs.get("activity_level", "rest"),
-            hormones=hormone_out
-        )
+            cv_inputs = {}
+            for payload in self.streams[("Gut", "CardiovascularTransport")].step(self.time.minute):
+                if isinstance(payload, dict):
+                    cv_inputs.update(payload)
+            cardio_out = self.units["CardiovascularTransport"].step(cv_inputs)
 
-        lung_out = self.units["lungs"].exchange(
-            duration_min=self.time_step,
-            co2_in=muscle_out["exhaust"].get("co2", 0)
-        )
+            mobilized = self.units["Storage"].mobilize(
+                signal_strength=hormone_out.get("glucagon", 0.5), duration_hr=1
+            )
 
-        kidney_out = self.units["kidney"].step(
-            {"urea": 5.0, "water": cardio_out["to_systemic"].get("water", 0)}
-        )
+            liver_out = self.units["Liver"].route(
+                portal_input=cardio_out["to_liver"],
+                microbiome_input=colon_out["scfa_output"],
+                mobilized_reserves=mobilized["mobilized"],
+                signals=hormone_out,
+            )
 
-        skin_out = self.units["skin"].regulate(
-            core_temp=inputs.get("core_body_temperature", 36.8),
-            ambient_temp=inputs.get("ambient_temperature", 22.0),
-            hormones=hormone_out
-        )
+            muscle_out = self.units["Muscle"].metabolize(
+                inputs=liver_out["to_muscle_aerobic"],
+                activity_level=external_inputs.get("activity_level", "rest"),
+                hormones=hormone_out,
+            )
 
-        self.units["sleep"].update_state(hours_since_last_sleep=inputs.get("hours_awake", 12))
-        sleep_out = self.units["sleep"].compute_sleep_signals(
-            current_hour=current["hour"],
-            wearable_signals=inputs.get("wearable_signals", {})
-        )
+            lung_out = self.units["Lungs"].exchange(
+                duration_min=60,
+                co2_in=muscle_out["exhaust"].get("co2", 0),
+            )
 
-        self.units["storage"].store(liver_out["to_storage"])
+            kidney_out = self.units["Kidney"].step(
+                {"urea": 5.0, "water": cardio_out["to_systemic"].get("water", 0)}
+            )
 
-        self.history.append({
-            "time": current,
-            "brain": brain_out,
-            "gut": gut_out,
-            "colon": colon_out,
-            "cardio": cardio_out,
-            "liver": liver_out,
-            "muscle": muscle_out,
-            "lungs": lung_out,
-            "kidney": kidney_out,
-            "skin": skin_out,
-            "sleep": sleep_out,
-            "storage": mobilized
-        })
+            skin_out = self.units["Skin"].regulate(
+                core_temp=external_inputs.get("core_body_temperature", 36.8),
+                ambient_temp=external_inputs.get("ambient_temperature", 22.0),
+                hormones=hormone_out,
+            )
 
-        if self.verbose:
-            print(f"\n[Step {current['hour']}] Simulation Outputs:")
-            print(f"🧠 Brain: {brain_out}")
-            print(f"🍽️ Gut: {gut_out}")
-            print(f"🧬 Colon: {colon_out}")
-            print(f"💉 Hormones: {hormone_out}")
-            print(f"❤️ Cardio: {cardio_out}")
-            print(f"🧪 Liver: {liver_out}")
-            print(f"💪 Muscle: {muscle_out}")
-            print(f"🌬️ Lungs: {lung_out}")
-            print(f"🫁 Kidney: {kidney_out}")
-            print(f"🌡️ Skin: {skin_out}")
-            print(f"🛏️ Sleep: {sleep_out}")
-            print(f"🪙 Storage: {self.units['storage'].current_glycogen:.1f}g glycogen, {self.units['storage'].current_fat:.1f}g fat")
-            print("—" * 80)
+            sleep_unit = self.units["SleepRegulationCenter"]
+            sleep_unit.update_state(hours_since_last_sleep=external_inputs.get("hours_awake", 12))
+            sleep_out = sleep_unit.compute_sleep_signals(
+                current_hour=self.time.hour,
+                wearable_signals=self.signals.get("SleepRegulationCenter", {}),
+            )
 
-        self.clock.tick(self.time_step)
+            self.units["Storage"].store(liver_out["to_storage"])
 
-    def run(self, steps=1):
+            if self.verbose:
+                print(f"[t={self.time.minute}] Brain={brain_out} Gut={gut_out}")
+
+        self._record_state()
+        self.time.tick(60)
+
+    # ------------------------------------------------------------------
+    def run(self, steps: int, external_inputs: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         for _ in range(steps):
-            self.step()
+            self.step(external_inputs)
         return self.history
