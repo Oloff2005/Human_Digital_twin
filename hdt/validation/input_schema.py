@@ -19,3 +19,12 @@ class AppleHealthInput(BaseModel):
     training_readiness: Optional[int] = None
     recovery_time_estimate: Optional[int] = None
 
+class InputValidator:
+    """Validates and converts raw wearable JSON input using the ``AppleHealthInput`` schema."""
+
+    model = AppleHealthInput
+
+    @classmethod
+    def validate(cls, data: dict) -> dict:
+        """Return a dictionary of validated values or raise ``ValidationError``."""
+        return cls.model(**data).model_dump(exclude_none=True)
