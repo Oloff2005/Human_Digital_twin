@@ -1,22 +1,19 @@
 class BrainController:
     def __init__(self, config):
-        """
-        Simulates integration of stress, circadian, and energy signals.
+        """Central logic hub for hormonal and behavioral control."""
 
-        Args:
-            config (dict): {
-                'cortisol_threshold': (float) stress sensitivity,
-                'stress_decay_rate': (float) how fast stress dissipates,
-                'circadian_baseline': (float) baseline circadian tone
-            }
-        """
         self.cortisol_threshold = config.get("cortisol_threshold", 0.65)
         self.stress_decay_rate = config.get("stress_decay_rate", 0.07)
         self.circadian_baseline = config.get("circadian_baseline", 1.0)
 
         # Internal state
         self.stress_level = 0.0
+        self.hunger_level = 0.5
+        self.sleep_pressure = 0.0
         self.time_of_day = 0  # hour 0–23
+
+        # Optional output overrides
+        self._override = {}
 
     def integrate_inputs(self, muscle_signals, gut_signals, wearable_signals, time_of_day):
         """
@@ -90,6 +87,65 @@ class BrainController:
 
         return signals
 
+    # ------------------------------------------------------------------
+    # New control routing logic
+    def route_control_signals(self, wearable_signals, metabolic_state):
+        """Process wearable and metabolic inputs into control outputs."""
+        stress_score = wearable_signals.get("stress_score", 0.0)
+        sleep_score = wearable_signals.get("sleep_score", 0.8)
+
+        ghrelin = metabolic_state.get("ghrelin", 0.5)
+        leptin = metabolic_state.get("leptin", 0.5)
+
+        # Update internal states
+        self.stress_level = max(
+            0.0,
+            self.stress_level * (1 - self.stress_decay_rate) + stress_score,
+        )
+
+        self.hunger_level = max(0.0, min(1.0, ghrelin * (1 - leptin)))
+        self.sleep_pressure = max(0.0, self.sleep_pressure * 0.9 + (1 - sleep_score) * 0.1)
+
+        cortisol = min(1.0, self.stress_level * self.cortisol_threshold)
+        hormone_signals = {
+            "cortisol": round(cortisol, 3),
+            "ghrelin": round(self.hunger_level, 3),
+            "melatonin": round(self.sleep_pressure, 3),
+        }
+
+        activity_intensity = min(1.0, wearable_signals.get("steps", 0) / 10000)
+        sleep_trigger = self.sleep_pressure > 0.7
+
+        outputs = {
+            "hormone_signals": hormone_signals,
+            "activity_intensity": activity_intensity,
+            "sleep_trigger": sleep_trigger,
+        }
+
+        # Apply overrides if provided
+        for key, value in self._override.items():
+            outputs[key] = value
+
+        return outputs
+
+    def inject_override(self, override_dict):
+        """Override output signals in ``route_control_signals``."""
+        self._override = override_dict or {}
+
+    def get_state(self):
+        return {
+            "stress_level": self.stress_level,
+            "hunger_level": self.hunger_level,
+            "sleep_pressure": self.sleep_pressure,
+            "time_of_day": self.time_of_day,
+        }
+
+    def set_state(self, state_dict):
+        self.stress_level = state_dict.get("stress_level", self.stress_level)
+        self.hunger_level = state_dict.get("hunger_level", self.hunger_level)
+        self.sleep_pressure = state_dict.get("sleep_pressure", self.sleep_pressure)
+        self.time_of_day = state_dict.get("time_of_day", self.time_of_day)
+
     def set_manual_override(self, state_name, value):
         """
         Manually override internal states like stress_level or time_of_day.
@@ -97,11 +153,35 @@ class BrainController:
         if hasattr(self, state_name):
             setattr(self, state_name, value)
 
-    def step(self, muscle_signals, gut_signals, wearable_signals, time_of_day):
-        """
-        Execute one simulation step for the brain controller.
+    def step(
+        self,
+        muscle_signals=None,
+        gut_signals=None,
+        wearable_signals=None,
+        time_of_day=None,
+        metabolic_state=None,
+    ):
+        """Execute one control step.
 
-        Returns:
-            dict: Signals for the next unit
+        This keeps backward compatibility with the original signature while also
+        supporting the new ``route_control_signals`` interface.
         """
-        return self.integrate_inputs(muscle_signals, gut_signals, wearable_signals, time_of_day)
+
+        wearable_signals = wearable_signals or {}
+        metabolic_state = metabolic_state or {}
+
+        if time_of_day is not None:
+            self.time_of_day = time_of_day
+
+        legacy = muscle_signals is not None or gut_signals is not None or time_of_day is not None
+
+        outputs = {}
+        if legacy:
+            outputs.update(
+                self.integrate_inputs(
+                    muscle_signals or {}, gut_signals or {}, wearable_signals, self.time_of_day
+                )
+            )
+
+        outputs.update(self.route_control_signals(wearable_signals, metabolic_state))
+        return outputs
