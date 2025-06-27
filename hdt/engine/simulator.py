@@ -1,5 +1,8 @@
+from hdt.core.time_manager import TimeManager
+
+
 class Simulator:
-    def __init__(self, config, initial_inputs, verbose=False):
+    def __init__(self, config, initial_inputs, verbose=False, start_minute=0):
         from hdt.unit_operations.brain_controller import BrainController
         from hdt.unit_operations.gut_reactor import GutReactor
         from hdt.unit_operations.colon_microbiome_reactor import ColonMicrobiomeReactor
@@ -32,23 +35,25 @@ class Simulator:
         }
 
         self.initial_inputs = initial_inputs
-        self.time = 0
+        self.clock = TimeManager(start_minute)
+        self.time_step = 60  # minutes per simulation step
         self.history = []
         self.verbose = verbose
 
     def step(self):
         inputs = self.initial_inputs.copy()
+        current = self.clock.get_time_state()
 
         brain_out = self.units["brain"].step(
             muscle_signals=inputs.get("muscle_signals", {}),
             gut_signals=inputs.get("gut_signals", {}),
             wearable_signals=inputs.get("wearable_signals", {}),
-            time_of_day=self.time % 24
+            time_of_day=current["hour"]
         )
 
         gut_out = self.units["gut"].step(
             meal_input=inputs.get("meal", {}),
-            duration_min=60,
+            duration_min=self.time_step,
             hormones=brain_out
         )
 
@@ -76,7 +81,7 @@ class Simulator:
         )
 
         lung_out = self.units["lungs"].exchange(
-            duration_min=60,
+            duration_min=self.time_step,
             co2_in=muscle_out["exhaust"].get("co2", 0)
         )
 
@@ -92,14 +97,14 @@ class Simulator:
 
         self.units["sleep"].update_state(hours_since_last_sleep=inputs.get("hours_awake", 12))
         sleep_out = self.units["sleep"].compute_sleep_signals(
-            current_hour=self.time % 24,
+            current_hour=current["hour"],
             wearable_signals=inputs.get("wearable_signals", {})
         )
 
         self.units["storage"].store(liver_out["to_storage"])
 
         self.history.append({
-            "time": self.time,
+            "time": current,
             "brain": brain_out,
             "gut": gut_out,
             "colon": colon_out,
@@ -114,7 +119,7 @@ class Simulator:
         })
 
         if self.verbose:
-            print(f"\n[Step {self.time}] Simulation Outputs:")
+            print(f"\n[Step {current['hour']}] Simulation Outputs:")
             print(f"🧠 Brain: {brain_out}")
             print(f"🍽️ Gut: {gut_out}")
             print(f"🧬 Colon: {colon_out}")
@@ -129,7 +134,7 @@ class Simulator:
             print(f"🪙 Storage: {self.units['storage'].current_glycogen:.1f}g glycogen, {self.units['storage'].current_fat:.1f}g fat")
             print("—" * 80)
 
-        self.time += 1
+        self.clock.tick(self.time_step)
 
     def run(self, steps=1):
         for _ in range(steps):
