@@ -5,6 +5,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
+
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config
 from hdt.inputs.input_parser import InputParser
