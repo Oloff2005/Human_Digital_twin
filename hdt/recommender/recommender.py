@@ -64,3 +64,43 @@ class Recommender:
     def get_rules(self) -> List[Dict[str, Any]]:
         """Return the currently loaded rule set."""
         return self.rules
+
+
+def threshold_rule_match(values: Dict[str, float], rules_path: str) -> List[str]:
+    """Return recommendations based on numeric threshold rules."""
+    if yaml is not None:
+        with open(rules_path, "r", encoding="utf-8") as f:
+            rules = yaml.safe_load(f) or {}
+    else:
+        from hdt.config_loader import _simple_yaml_load
+        rules = _simple_yaml_load(rules_path)
+
+    suggestions: List[str] = []
+    for metric, thresh in rules.items():
+        if metric not in values:
+            continue
+        val = values[metric]
+
+        high = thresh.get("high") if isinstance(thresh, dict) else None
+        if isinstance(high, dict):
+            t = high.get("threshold")
+            try:
+                if t is not None and val > float(t):
+                    msg = high.get("message")
+                    if msg:
+                        suggestions.append(str(msg).strip('"').strip("'"))
+            except (ValueError, TypeError):
+                pass
+
+        low = thresh.get("low") if isinstance(thresh, dict) else None
+        if isinstance(low, dict):
+            t = low.get("threshold")
+            try:
+                if t is not None and val < float(t):
+                    msg = low.get("message")
+                    if msg:
+                        suggestions.append(str(msg).strip('"').strip("'"))
+            except (ValueError, TypeError):
+                pass
+
+    return suggestions

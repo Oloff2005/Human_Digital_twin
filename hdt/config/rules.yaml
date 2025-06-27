@@ -1,0 +1,22 @@
+glucose:
+  high:
+    threshold: 8.0
+    message: "Reduce carbohydrate intake; blood sugar elevated."
+  low:
+    threshold: 4.0
+    message: "Consider eating a small snack to stabilize glucose."
+
+cortisol:
+  high:
+    threshold: 0.7
+    message: "High stress detected. Prioritize rest and reduce workload."
+
+sleep_quality:
+  low:
+    threshold: 60
+    message: "Low sleep quality. Aim for consistent bedtime and avoid screens."
+
+heart_rate:
+  high:
+    threshold: 100
+    message: "Elevated heart rate. Consider breathing exercises or hydration."
