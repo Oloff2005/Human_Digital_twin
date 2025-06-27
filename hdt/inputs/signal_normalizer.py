@@ -1,3 +1,9 @@
+import numpy as np
+from utils.logging_utils import setup_logger
+
+logger = setup_logger(__name__)
+
+
 class SignalNormalizer:
     def __init__(self):
         """
@@ -26,6 +32,12 @@ class SignalNormalizer:
             normalized_signals[unit] = {}
 
             for signal, value in signals.items():
+                if value is None:
+                    logger.warning("%s.%s is None; skipping", unit, signal)
+                    continue
+                if isinstance(value, (int, float)) and np.isnan(value):
+                    logger.warning("%s.%s is NaN; skipping", unit, signal)
+                    continue
                 normalized_value = self._normalize_signal(signal, value)
                 normalized_signals[unit][signal] = normalized_value
 

@@ -37,6 +37,21 @@ class TestSignalNormalizer(unittest.TestCase):
         result = self.normalizer.normalize(sample_input)
         self.assertEqual(result["MuscleEffector"]["fatigue_signal"], 3.0)
         self.assertEqual(result["MuscleEffector"]["lactate"], 1.2)
+        
+    def test_skips_invalid_values(self):
+        sample_input = {
+            "BrainController": {
+                "heart_rate": None,
+                "hrv": float('nan')
+            }
+        }
+
+        with self.assertLogs('hdt.inputs.signal_normalizer', level='WARNING') as cm:
+            result = self.normalizer.normalize(sample_input)
+
+        self.assertEqual(result["BrainController"], {})
+        self.assertTrue(any('heart_rate' in msg for msg in cm.output))
+        self.assertTrue(any('hrv' in msg for msg in cm.output))
 
 if __name__ == "__main__":
     unittest.main()

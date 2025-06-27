@@ -48,6 +48,14 @@ class TestInputParser(unittest.TestCase):
         self.assertIn("BrainController", parsed)
         self.assertEqual(parsed["BrainController"]["heart_rate"], 62)
         self.assertNotIn("hrv", parsed.get("BrainController", {}))
+    
+    def test_logs_and_skips_invalid_values(self):
+        bad_input = {"heart_rate": None, "hrv": float('nan')}
+        with self.assertLogs('hdt.inputs.input_parser', level='WARNING') as cm:
+            parsed = self.parser.parse(bad_input)
+        self.assertEqual(parsed, {})
+        self.assertTrue(any('heart_rate' in msg for msg in cm.output))
+        self.assertTrue(any('hrv' in msg for msg in cm.output))
 
 if __name__ == "__main__":
     unittest.main()

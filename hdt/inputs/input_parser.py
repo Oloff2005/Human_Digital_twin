@@ -1,4 +1,8 @@
 import json
+import numpy as np
+from utils.logging_utils import setup_logger
+
+logger = setup_logger(__name__)
 
 class InputParser:
     def __init__(self, mapping_path: str):
@@ -39,13 +43,18 @@ class InputParser:
             with open(raw_data, 'r') as f:
                 raw_data = json.load(f)
 
-
         parsed_signals = {}
 
         for signal, targets in self.mapping.items():
-            if signal in raw_data and raw_data[signal] is not None:
-                for target in targets:
-                    parsed_signals.setdefault(target, {})
-                    parsed_signals[target][signal] = raw_data[signal]
+             value = raw_data.get(signal)
+             if value is None:
+                logger.warning("%s missing or None; skipping", signal)
+                continue
+             if isinstance(value, (int, float)) and np.isnan(value):
+                logger.warning("%s is NaN; skipping", signal)
+                continue
+             for target in targets:
+                parsed_signals.setdefault(target, {})
+                parsed_signals[target][signal] = value
 
         return parsed_signals
