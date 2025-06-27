@@ -1,0 +1,69 @@
+# sample_configs/units_config.yaml
+# Initial configuration for each physiological unit
+brain:
+  cortisol_threshold: 0.65
+  stress_decay_rate: 0.07
+  circadian_baseline: 1.0
+
+gut:
+  digestion_efficiency: 0.9
+  gastric_emptying_rate: 1.5
+  absorption_delay: 10
+
+colon:
+  fiber_fermentation_efficiency: 0.5
+  scfa_profile:
+    acetate: 0.6
+    propionate: 0.2
+    butyrate: 0.2
+  transit_time: 480
+
+liver:
+  glycogen_capacity: 110
+  gluconeogenesis_rate: 1.4
+  insulin_sensitivity: 0.8
+  glucagon_sensitivity: 0.8
+
+cardio:
+  cardiac_output: 5.0
+  hormone_transport_delay: 1.0
+
+kidney:
+  urea_clearance: 55
+  fluid_reabsorption: 0.96
+
+muscle:
+  resting_atp_demand: 2.5
+  exercise_factor: 4.0
+  fat_utilization_rate: 0.5
+
+hormones:
+  cortisol:
+    - insulin
+    - digestive_signal
+  glucagon:
+    - insulin
+
+lungs:
+  oxygen_uptake_rate: 320
+  co2_exhale_rate: 250
+
+storage:
+  max_glycogen: 400
+  max_fat: 12000
+  mobilization_rate: 60
+  initial_glycogen: 300
+  initial_fat: 8000
+
+pancreas:
+  insulin_release_threshold: 5.2
+  glucagon_release_threshold: 4.2
+
+skin:
+  sweat_rate_max: 1.8
+  vasodilation_temp_threshold: 37.2
+
+sleep:
+  melatonin_release_rate: 0.35
+  circadian_peak_time: 23
+  sleep_drive_gain: 1.4

@@ -1,0 +1,18 @@
+# sample_configs/sim_params.yaml
+# Basic simulation parameters
+
+# total simulated time in hours
+duration_hours: 24
+
+# simulation step size
+step_minutes: 15
+
+# run mode: 'discrete' or 'ode'
+mode: discrete
+
+# output every N steps
+output_interval: 10
+
+verbose: true
+apply_noise: false
+record_history: true

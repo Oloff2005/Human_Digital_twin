@@ -1,0 +1,6 @@
+{
+    "heart_rate": ["BrainController", "CardiovascularTransport"],
+    "hrv": ["BrainController"],
+    "steps": ["BrainController", "MuscleReactor"],
+    "sleep_score": ["BrainController", "SleepRegulationCenter"]
+}
