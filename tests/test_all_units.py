@@ -48,7 +48,7 @@ class TestAllUnits(unittest.TestCase):
         self.assertIn("substrate_used", result)
 
     def test_storage_unit(self):
-       store = FatStorageReservoir({})
+        store = FatStorageReservoir({})
         result = store.store({"glucose": 20, "fatty_acids": 10})
         self.assertIn("glycogen", result)
         self.assertIn("fat", result)
