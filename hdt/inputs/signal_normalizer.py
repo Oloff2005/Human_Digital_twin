@@ -26,6 +26,8 @@ class SignalNormalizer:
             normalized_signals[unit] = {}
 
             for signal, value in signals.items():
+                if value is None:
+                    continue
                 normalized_value = self._normalize_signal(signal, value)
                 normalized_signals[unit][signal] = normalized_value
 

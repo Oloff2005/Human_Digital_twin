@@ -1,8 +1,6 @@
 # solver.py
 
-from typing import List, Dict, Tuple, Callable
-import numpy as np
-from scipy.integrate import solve_ivp
+from typing import List, Dict, Tuple
 
 
 class ODESolver:
@@ -27,42 +25,30 @@ class ODESolver:
                 self.state_vars.append(var)
                 self.var_to_unit[var] = unit
 
-    def _combined_derivatives(self, t, y):
-        """
-        Flattened derivative vector for all units.
-        """
-        # Map flat y to {var_name: value}
-        state_dict = dict(zip(self.state_vars, y))
-        dydt = []
-
-        for var in self.state_vars:
-            unit = self.var_to_unit[var]
-            # Build unit-specific state
-            unit_state = {v: state_dict[v] for v in unit.get_state().keys()}
+    def _combined_derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
+        """Compute derivatives for the full system as a flat dictionary."""
+        derivatives = {}
+        for unit in self.units:
+            unit_state = {v: state[v] for v in unit.get_state().keys()}
             derivs = unit.derivatives(t, unit_state)
-            dydt.append(derivs[var])  # extract only the needed var
-
-        return dydt
+            derivatives.update(derivs)
+        return derivatives
 
     def solve(self, t_span: Tuple[float, float], y0: Dict[str, float], t_eval=None):
-        """
-        Solves the ODE system over time t_span with initial state y0.
-        """
-        y0_list = [y0[var] for var in self.state_vars]
-
-        sol = solve_ivp(
-            fun=self._combined_derivatives,
-            t_span=t_span,
-            y0=y0_list,
-            t_eval=t_eval,
-            method="RK45",  # could use "LSODA" for stiffness
-            vectorized=False,
-        )
-
-        # Map back to dict format for each time step
+        """Simple Euler solver to avoid heavy dependencies."""
+        if t_eval is None:
+            t_eval = [t_span[0], t_span[1]]
+        current_state = dict(y0)
+        current_t = t_eval[0]
         results = []
-        for i, t in enumerate(sol.t):
-            state_at_t = {var: sol.y[j][i] for j, var in enumerate(self.state_vars)}
-            results.append({"t": t, "state": state_at_t})
+
+        for next_t in t_eval:
+            dt = next_t - current_t
+            if dt > 0:
+                derivs = self._combined_derivatives(current_t, current_state)
+                for var in self.state_vars:
+                    current_state[var] += derivs[var] * dt
+                current_t = next_t
+            results.append({"t": next_t, "state": dict(current_state)})
 
         return results
