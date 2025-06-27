@@ -2,5 +2,7 @@ numpy==2.2.6
 pydantic
 fastapi
 uvicorn
-pyyamlseaborn==0.13.2
+pyyaml
+seaborn==0.13.2      
 matplotlib==3.10.3
+
