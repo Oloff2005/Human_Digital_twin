@@ -9,15 +9,15 @@ class Connection:
 
 
 STREAM_MAP: List[Connection] = [
-    Connection("Gut", "CardiovascularTransport"),
-    Connection("CardiovascularTransport", "Liver"),
-    Connection("CardiovascularTransport", "Muscle"),
-    Connection("CardiovascularTransport", "Storage"),
+    Connection("Gut", "HeartCirculation"),
+    Connection("HeartCirculation", "Liver"),
+    Connection("HeartCirculation", "Muscle"),
+    Connection("HeartCirculation", "Storage"),
     Connection("Liver", "Muscle"),
     Connection("Liver", "Storage"),
     Connection("BrainController", "HormoneRouter"),
     Connection("HormoneRouter", "Gut"),
-    Connection("HormoneRouter", "CardiovascularTransport"),
+    Connection("HormoneRouter", "HeartCirculation"),
     Connection("HormoneRouter", "Liver"),
     Connection("HormoneRouter", "Muscle"),
     Connection("HormoneRouter", "Storage"),

@@ -1,7 +1,7 @@
 from .base_unit import BaseUnit
 
 
-class CardiovascularTransport(BaseUnit):
+class HeartCirculation(BaseUnit):
     def __init__(self, config):
         """Cardiovascular transport of nutrients and hormones.
 

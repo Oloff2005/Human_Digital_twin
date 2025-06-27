@@ -1,7 +1,7 @@
 {
     "heart_rate": [
         "BrainController",
-        "CardiovascularTransport"
+        "HeartCirculation"
     ],
     "resting_heart_rate": [
         "BrainController"

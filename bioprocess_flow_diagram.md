@@ -7,10 +7,10 @@
 |--------------------------|-------------------------------|---------------------------------------------------------------------------------|
 | `GITReactor`             | GIT Reactor                   | Digests meals, absorbs nutrients into bloodstream                              |
 | `ColonReactor`           | Colon + Microbiome Reactor    | Ferments unabsorbed fiber, produces SCFAs and gut-brain signals                |
-| `CardiovascularTransport`| Cardiovascular Transport      | Circulates nutrients, oxygen, hormones throughout body                         |
+| `HeartCirculation`       | Heart Circulation             | Circulates nutrients, oxygen, hormones throughout body                         |
 | `LiverMetabolicRouter`   | Liver Metabolic Router        | Routes substrates, performs gluconeogenesis, ketone synthesis, detox           |
 | `MuscleReactor`          | Muscle Reactor                | Consumes ATP based on effort, produces fatigue, CO₂, and signals               |
-| `StorageUnit`            | Storage Unit                  | Stores and mobilizes glycogen, triglycerides                                   |
+| `FatStorageReservoir`    | Storage Reservoir             | Stores and mobilizes glycogen, triglycerides                                   |
 | `KidneyReactor`          | Kidney Reactor                | Filters blood, maintains fluid/electrolyte balance, excretes urea              |
 | `LungReactor`            | Lung Reactor                  | Exchanges gases: takes in O₂, expels CO₂ and water vapor                       |
 | `BrainController`        | Brain Controller              | Integrates feedback, makes hormonal/neural decisions (central control unit)    |
@@ -23,13 +23,13 @@
 | **Stream** | **Origin**                 | **Destination**              | **Unit Operation Entered**     | **Purpose / Description**                                               |
 |------------|----------------------------|-------------------------------|----------------------------------|--------------------------------------------------------------------------|
 | 1          | External Input              | GIT Reactor                   | `GITReactor`                     | Ingested meal: carbs, fats, protein, water                               |
-| 2          | GIT Reactor                 | Cardiovascular Transport      | `CardiovascularTransport`        | Absorbed nutrients (glucose, amino acids, lipids)                        |
+| 2          | GIT Reactor                 | Heart Circulation             | `HeartCirculation`.              | Absorbed nutrients (glucose, amino acids, lipids)                        |
 | 3          | GIT Reactor                 | Colon Reactor                 | `ColonReactor`                   | Indigestible fiber and residues                                          |
 | 4          | Cardiovascular Transport    | Liver Metabolic Router        | `LiverMetabolicRouter`           | Portal nutrient stream (post-meal)                                       |
 | 5          | Cardiovascular Transport    | Muscle, Brain, Kidney         | `MuscleReactor`, `BrainController`, `KidneyReactor` | Systemic arterial nutrient delivery                              |
 | 6          | Liver Metabolic Router      | Muscle Reactor                | `MuscleReactor`                  | Aerobic fuels: glucose, fats                                             |
 | 7          | Liver Metabolic Router      | Muscle Reactor                | `MuscleReactor`                  | Anaerobic fuels: ketones, lactate                                        |
-| 8          | Liver Metabolic Router      | Storage Unit                  | `StorageUnit`                    | Glycogen & triglyceride storage                                          |
+| 8          | Liver Metabolic Router      | Fat Storage reservoir         | `Fat Storage Reservoir`          | Glycogen & triglyceride storage                                          |
 | 9          | Kidney Reactor              | Environment                   | `KidneyReactor`                  | Urine output: water, urea, salts                                         |
 | 10         | Colon Reactor               | Environment                   | `ColonReactor`                   | Fecal waste and microbiota metabolites                                   |
 | 11         | Muscle Reactor              | Lung Reactor                  | `LungReactor`                    | CO₂ and water vapor output                                               |
@@ -48,7 +48,7 @@
 
 | **Signal**              | **Internal Name**            | **Destination Units**                            |
 |-------------------------|------------------------------|--------------------------------------------------|
-| Heart Rate              | `heart_rate`                | BrainController, CardiovascularTransport         |
+| Heart Rate              | `heart_rate`                | BrainController, HeartCirculation.               |
 | Resting Heart Rate      | `resting_heart_rate`        | BrainController                                  |
 | HRV                     | `parasympathetic_tone`      | BrainController                                  |
 | Sleep Score             | `sleep_score`               | BrainController, SleepRegulationCenter           |

@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from hdt.unit_operations.gut_reactor import GutReactor
 from hdt.unit_operations.liver_metabolic_router import LiverMetabolicRouter
 from hdt.unit_operations.muscle_effector import MuscleEffector
-from hdt.unit_operations.storage_unit import StorageUnit
+from hdt.unit_operations.fat_storage_reservoir import FatStorageReservoir
 from hdt.engine.solver import ODESolver
 
 # Initialize unit operations
@@ -21,7 +21,7 @@ muscle = MuscleEffector(config={
     "resting_atp_demand": 2.5
 })
 
-storage = StorageUnit(config={
+storage = FatStorageReservoir(config={
     "max_glycogen": 400,
     "max_fat": 12000,
     "initial_glycogen": 300,

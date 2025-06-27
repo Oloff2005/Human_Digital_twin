@@ -32,12 +32,12 @@ class Simulator:
         from hdt.unit_operations.gut_reactor import GutReactor
         from hdt.unit_operations.colon_microbiome_reactor import ColonMicrobiomeReactor
         from hdt.unit_operations.liver_metabolic_router import LiverMetabolicRouter
-        from hdt.unit_operations.cardiovascular_transport import CardiovascularTransport
+        from hdt.unit_operations.heart_circulation import HeartCirculation
         from hdt.unit_operations.kidney_reactor import KidneyReactor
         from hdt.unit_operations.muscle_effector import MuscleEffector
         from hdt.unit_operations.hormone_router import HormoneRouter
         from hdt.unit_operations.lung_reactor import LungReactor
-        from hdt.unit_operations.storage_unit import StorageUnit
+        from hdt.unit_operations.fat_storage_reservoir import FatStorageReservoir
         from hdt.unit_operations.pancreatic_valve import PancreaticValve
         from hdt.unit_operations.skin_thermoregulator import SkinThermoregulator
         from hdt.unit_operations.sleep_regulation_center import SleepRegulationCenter
@@ -47,12 +47,12 @@ class Simulator:
             "Gut": GutReactor(config.get("gut", {})),
             "Colon": ColonMicrobiomeReactor(config.get("colon", {})),
             "Liver": LiverMetabolicRouter(config.get("liver", {})),
-            "CardiovascularTransport": CardiovascularTransport(config.get("cardio", {})),
+            "HeartCirculation": HeartCirculation(config.get("cardio", {})),
             "Kidney": KidneyReactor(config.get("kidney", {})),
             "Muscle": MuscleEffector(config.get("muscle", {})),
             "HormoneRouter": HormoneRouter(config.get("hormones", {})),
             "Lungs": LungReactor(config.get("lungs", {})),
-            "Storage": StorageUnit(config.get("storage", {})),
+            "Storage": FatStorageReservoir(config.get("storage", {})),
             "PancreaticValve": PancreaticValve(config.get("pancreas", {})),
             "Skin": SkinThermoregulator(config.get("skin", {})),
             "SleepRegulationCenter": SleepRegulationCenter(config.get("sleep", {})),
@@ -134,15 +134,15 @@ class Simulator:
 
             gut_inputs = external_inputs.get("meal", {})
             gut_out = self.units["Gut"].step(meal_input=gut_inputs, duration_min=60, hormones=hormone_out)
-            self.streams[("Gut", "CardiovascularTransport")].push(gut_out["absorbed"], self.time.minute)
+            self.streams[("Gut", "HeartCirculation")].push(gut_out["absorbed"], self.time.minute)
 
             colon_out = self.units["Colon"].step(gut_out["residue"].get("fiber", 0))
 
             cv_inputs = {}
-            for payload in self.streams[("Gut", "CardiovascularTransport")].step(self.time.minute):
+            for payload in self.streams[("Gut", "HeartCirculation")].step(self.time.minute):
                 if isinstance(payload, dict):
                     cv_inputs.update(payload)
-            cardio_out = self.units["CardiovascularTransport"].step(cv_inputs)
+            cardio_out = self.units["HeartCirculation"].step(cv_inputs)
 
             mobilized = self.units["Storage"].mobilize(
                 signal_strength=hormone_out.get("glucagon", 0.5), duration_hr=1

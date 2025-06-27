@@ -5,7 +5,7 @@ class TestInputParser(unittest.TestCase):
     def setUp(self):
         # Simulate wearable_mapping.json structure
         self.mock_mapping = {
-            "heart_rate": ["BrainController", "CardiovascularTransport"],
+            "heart_rate": ["BrainController", "HeartCirculation"],
             "hrv": ["BrainController"],
             "sleep_score": ["BrainController", "SleepRegulationCenter"],
             "steps": ["BrainController", "MuscleReactor"]
@@ -32,13 +32,14 @@ class TestInputParser(unittest.TestCase):
         self.assertIn("BrainController", parsed)
         self.assertIn("SleepRegulationCenter", parsed)
         self.assertIn("MuscleReactor", parsed)
-        self.assertIn("CardiovascularTransport", parsed)
+        self.assertIn("HeartCirculation", parsed)
 
         self.assertEqual(parsed["BrainController"]["heart_rate"], 70)
         self.assertEqual(parsed["BrainController"]["hrv"], 85)
         self.assertEqual(parsed["BrainController"]["sleep_score"], 90)
         self.assertEqual(parsed["MuscleReactor"]["steps"], 11000)
-        self.assertEqual(parsed["CardiovascularTransport"]["heart_rate"], 70)
+        self.assertEqual(parsed["HeartCirculation"]["heart_rate"], 70)
+
 
     def test_handles_missing_data(self):
         incomplete_input = {

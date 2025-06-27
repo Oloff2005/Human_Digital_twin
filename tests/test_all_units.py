@@ -8,14 +8,14 @@ from hdt.unit_operations.gut_reactor import GutReactor
 from hdt.unit_operations.colon_microbiome_reactor import ColonMicrobiomeReactor
 from hdt.unit_operations.liver_metabolic_router import LiverMetabolicRouter
 from hdt.unit_operations.muscle_effector import MuscleEffector
-from hdt.unit_operations.storage_unit import StorageUnit
+from hdt.unit_operations.fat_storage_reservoir import FatStorageReservoir 
 from hdt.unit_operations.kidney_reactor import KidneyReactor
 from hdt.unit_operations.lung_reactor import LungReactor
 from hdt.unit_operations.brain_controller import BrainController
 from hdt.unit_operations.skin_thermoregulator import SkinThermoregulator
 from hdt.unit_operations.sleep_regulation_center import SleepRegulationCenter
 from hdt.unit_operations.pancreatic_valve import PancreaticValve
-from hdt.unit_operations.hormone_router import HormoneRouter  # NEW
+from hdt.unit_operations.hormone_router import HormoneRouter  
 
 class TestAllUnits(unittest.TestCase):
     def test_gut_reactor(self):
@@ -48,7 +48,7 @@ class TestAllUnits(unittest.TestCase):
         self.assertIn("substrate_used", result)
 
     def test_storage_unit(self):
-        store = StorageUnit({})
+       store = FatStorageReservoir({})
         result = store.store({"glucose": 20, "fatty_acids": 10})
         self.assertIn("glycogen", result)
         self.assertIn("fat", result)

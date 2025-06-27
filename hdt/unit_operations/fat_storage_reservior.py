@@ -1,7 +1,7 @@
 from .base_unit import BaseUnit
 
 
-class StorageUnit(BaseUnit):
+class FatStorageReservoir(BaseUnit):
     def __init__(self, config):
         """
         ODE-compatible energy storage unit for glycogen and fat.
