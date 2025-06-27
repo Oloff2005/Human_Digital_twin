@@ -15,12 +15,10 @@ class TestRecommender(unittest.TestCase):
     def test_recommend_structure(self):
         state = {"Liver": {"glucose": 160}}
         output = self.rec.recommend(state)
-        self.assertIsInstance(output, dict)
-        self.assertIn("suggestions", output)
-        self.assertIsInstance(output["suggestions"], list)
-        for item in output["suggestions"]:
+        self.assertIsInstance(output, list)
+        for item in output:
             self.assertIsInstance(item, str)
-        self.assertIn("Consider reducing sugar intake", output["suggestions"])
+        self.assertIn("Consider reducing sugar intake", output)
 
 
 if __name__ == "__main__":

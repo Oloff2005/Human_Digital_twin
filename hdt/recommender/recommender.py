@@ -44,7 +44,8 @@ class Recommender:
         else:
             self.rules = _simple_rules_load(rules_path)
 
-    def recommend(self, state: Dict[str, Any]) -> Dict[str, List[str]]:
+    def recommend(self, state: Dict[str, Any]) -> List[str]:
+        """Return a list of suggestions based on the provided ``state``."""
         suggestions: List[str] = []
         for rule in self.rules:
             cond = rule.get("condition")
@@ -57,4 +58,9 @@ class Recommender:
                         suggestions.append(str(suggestion))
             except Exception:
                 continue
-        return {"suggestions": suggestions}
+        
+        return suggestions
+
+    def get_rules(self) -> List[Dict[str, Any]]:
+        """Return the currently loaded rule set."""
+        return self.rules
