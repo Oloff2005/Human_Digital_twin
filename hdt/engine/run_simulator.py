@@ -19,7 +19,7 @@ def run_simulator(config_path, input_path, steps=1, verbose=False):
     """
     # Load configurations
     config = load_units_config(config_path)
-    sim_params = load_sim_params("hdt/config/sim_params.yaml")
+    load_sim_params("hdt/config/sim_params.yaml")  # Ensure file is valid
 
 
     # Parse and normalize input
@@ -29,7 +29,7 @@ def run_simulator(config_path, input_path, steps=1, verbose=False):
     normalized_inputs = normalizer.normalize(parsed)
 
     # Initialize and run
-    sim = Simulator(config=config, initial_inputs=normalized_inputs, verbose=verbose)
+    sim = Simulator(config=config, wearable_inputs=normalized_inputs, verbose=verbose)
     results = sim.run(steps=steps)
 
     return results

@@ -1,5 +1,11 @@
 import argparse
 import json
+import os
+import sys
+
+# Allow running this script directly without installing the package
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from hdt.engine.run_simulator import run_simulator
 
 def main():

@@ -1,0 +1,8 @@
+insulin:
+  - PancreaticValve
+cortisol:
+  - BrainController
+glucagon:
+  - PancreaticValve
+melatonin:
+  - SleepRegulationCenter
