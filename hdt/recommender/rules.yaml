@@ -1,0 +1,3 @@
+- name: high_glucose
+  condition: "state.get('Liver', {}).get('glucose', 0) > 150"
+  suggestion: "Consider reducing sugar intake"
