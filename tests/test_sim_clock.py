@@ -19,12 +19,12 @@ MINIMAL_CONFIG = {
 
 class TestSimulatorClock(unittest.TestCase):
     def test_clock_advances_and_resets(self):
-        sim = Simulator(config=MINIMAL_CONFIG, initial_inputs={}, verbose=False)
-        self.assertEqual(sim.clock.get_time_state()['minute'], 0)
+        sim = Simulator(config=MINIMAL_CONFIG, verbose=False)
+        self.assertEqual(sim.time.get_time_state()['minute'], 0)
         sim.step()
-        self.assertEqual(sim.clock.get_time_state()['minute'], 60)
-        sim.clock.reset()
-        self.assertEqual(sim.clock.get_time_state()['minute'], 0)
+        self.assertEqual(sim.time.get_time_state()['minute'], 60)
+        sim.time.reset()
+        self.assertEqual(sim.time.get_time_state()['minute'], 0)
 
 if __name__ == '__main__':
     unittest.main()
