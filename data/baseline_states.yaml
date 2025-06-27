@@ -1,0 +1,48 @@
+# Baseline physiological state values for a resting 70kg male
+# Each key corresponds to a variable returned by unit get_state() methods.
+# Values are approximate typical levels in grams or unitless fractions.
+
+# Gut contents
+gut_glucose: 0.0
+gut_fatty_acids: 0.0
+gut_amino_acids: 0.0
+gut_water: 0.0
+
+# Cardiovascular transit pools
+cv_glucose: 0.0
+cv_fatty_acids: 0.0
+cv_amino_acids: 0.0
+cv_water: 0.0
+
+# Liver stores
+liver_glucose: 10.0
+liver_glycogen: 90.0
+
+# Muscle substrate pools
+muscle_glucose: 5.0
+muscle_fat: 300.0
+muscle_ketones: 0.0
+
+# Long‑term energy stores
+storage_glycogen: 300.0
+storage_fat: 8000.0
+
+# Pancreatic hormone levels
+pancreatic_insulin: 0.5
+pancreatic_glucagon: 0.5
+
+# Lung CO₂ pool
+lung_co2: 0.0
+
+# Skin cumulative metrics
+skin_sweat_total: 0.0
+skin_heat_loss_total: 0.0
+
+# Sleep drive state
+sleep_drive: 0.5
+
+# Brain controller metrics
+stress_level: 0.1
+hunger_level: 0.3
+sleep_pressure: 0.2
+time_of_day: 8
