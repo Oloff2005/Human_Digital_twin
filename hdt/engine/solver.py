@@ -1,11 +1,17 @@
-# solver.py
+from typing import List, Dict, Tuple
 
-from typing import List, Dict, Tuple, Callable
-import numpy as np
-from scipy.integrate import solve_ivp
-
+# Avoid heavy third party dependencies like numpy/scipy so that the test suite
+# can run in a minimal environment.  The solver below implements a very simple
+# explicit Euler integrator using only the Python standard library.
 
 class ODESolver:
+    """A very small ODE solver used in the tests.
+
+    The solver expects a collection of unit operations which expose
+    ``get_state``, ``set_state`` and ``derivatives`` methods.  It then performs
+    a forward Euler integration across the provided ``t_eval`` grid.
+    """
+
     def __init__(self, units: List):
         """
         Initialize with a list of unit operations.
@@ -37,18 +43,29 @@ class ODESolver:
         return derivatives
 
     def solve(self, t_span: Tuple[float, float], y0: Dict[str, float], t_eval=None):
-      """Simple Euler solver to avoid heavy dependencies."""
+      """Integrate the system using a simple Euler method."""
+
       if t_eval is None:
             t_eval = [t_span[0], t_span[1]]
+      
       current_state = dict(y0)
       current_t = t_eval[0]
       results = []
+
       for next_t in t_eval:
+            # Record the state at the beginning of the step
+            results.append({"t": current_t, "state": dict(current_state)})
+
             dt = next_t - current_t
             if dt > 0:
                 derivs = self._combined_derivatives(current_t, current_state)
                 for var in self.state_vars:
                     current_state[var] += derivs[var] * dt
                 current_t = next_t
+
+      # Append the final state if the last evaluation time was beyond the
+        # last recorded time point.
+      if results and results[-1]["t"] != current_t:
+            results.append({"t": current_t, "state": dict(current_state)})
 
       return results
