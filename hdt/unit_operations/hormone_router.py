@@ -8,8 +8,8 @@ class HormoneRouter:
                                     values are lists of suppressed hormones.
         """
         self.dominance_rules = dominance_rules or {
-            'cortisol': ['insulin', 'digestive_signal'],
-            'glucagon': ['insulin'],
+           "cortisol": ["insulin", "digestive_signal", "melatonin"],
+           "glucagon": ["insulin"],
         }
 
     def resolve(self, hormone_outputs):
@@ -31,6 +31,25 @@ class HormoneRouter:
                     adjusted[suppressed] *= max(0.0, 1 - 0.5 * strength)
 
         return adjusted
+    
+        # ------------------------------------------------------------------
+    # New routing interface
+    def route(self, hormone_candidates):
+        """Resolve dominance for a set of hormone candidates.
+
+        Parameters
+        ----------
+        hormone_candidates : dict
+            Dictionary of candidate hormone levels (0-1) such as
+            ``{"insulin": x, "glucagon": y, "cortisol": z, "melatonin": m}``.
+
+        Returns
+        -------
+        dict
+            Final hormone mix after applying dominance rules.
+        """
+        adjusted = self.resolve(hormone_candidates)
+        return {k: round(v, 3) for k, v in adjusted.items()}
 
     def step(self, hormone_outputs):
         """
@@ -42,4 +61,4 @@ class HormoneRouter:
         Returns:
             dict: adjusted hormones after resolving dominance
         """
-        return self.resolve(hormone_outputs)
+        return self.route(hormone_outputs)

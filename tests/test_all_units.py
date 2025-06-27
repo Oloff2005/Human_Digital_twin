@@ -84,11 +84,12 @@ class TestAllUnits(unittest.TestCase):
             "insulin": 0.8,
             "glucagon": 0.5,
             "cortisol": 0.6,
-            "digestive_signal": 0.9
+            "melatonin": 0.7
         }
-        result = router.resolve(signals)
+        result = router.route(signals)
         self.assertLess(result["insulin"], 0.8)
-        self.assertLess(result["digestive_signal"], 0.9)
+        self.assertLess(result["melatonin"], 0.7)
+        self.assertEqual(result, router.step(signals))
 
     def test_skin_thermoregulator(self):
         skin = SkinThermoregulator({})
