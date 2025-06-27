@@ -5,6 +5,7 @@ import unittest
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from hdt.recommender.recommender import Recommender, threshold_rule_match
+from hdt.recommender.rule_engine import RuleEngine
 
 
 class TestRecommender(unittest.TestCase):
@@ -30,7 +31,16 @@ class TestRecommender(unittest.TestCase):
         out = rec_b.recommend({"Liver": {"glucose": 160}})
         self.assertIn("Limit sugar intake", out)
         self.assertEqual(rec_b.get_version(), "version_B")
-        
+    
+    def test_rule_versions_different(self):
+        rec_a_out = self.rec.recommend({"Liver": {"glucose": 160}})
+        rules_path = os.path.join(
+            os.path.dirname(__file__), "..", "hdt", "recommender", "rules.yaml"
+        )
+        rec_b = Recommender(rules_path, rule_version="version_B")
+        rec_b_out = rec_b.recommend({"Liver": {"glucose": 160}})
+        self.assertNotEqual(rec_a_out, rec_b_out)
+
     def test_threshold_rule_match(self):
         path = os.path.join(
             os.path.dirname(__file__), "..", "hdt", "config", "rules.yaml"
@@ -58,7 +68,18 @@ class TestRecommender(unittest.TestCase):
             "Elevated heart rate. Consider breathing exercises or hydration.",
             out,
         )
-
+        
+    def test_rule_engine_mode_switch(self):
+        engine = RuleEngine(
+            mode="rule_based",
+            rules_path=os.path.join(os.path.dirname(__file__), "..", "hdt", "recommender", "rules.yaml"),
+            rule_version="version_A",
+        )
+        state = {"Liver": {"glucose": 160}}
+        rule_out = engine.get_recommendations(state)
+        engine.mode = "ml_based"
+        ml_out = engine.get_recommendations(state)
+        self.assertNotEqual(rule_out, ml_out)
 
 if __name__ == "__main__":
     unittest.main()
