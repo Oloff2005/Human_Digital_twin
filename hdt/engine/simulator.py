@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
+from pathlib import Path
+
+from hdt.recommender.rule_engine import RuleEngine
+
 from hdt.core.time_manager import TimeManager
 from hdt.engine.solver import ODESolver
 from hdt.inputs.input_parser import InputParser
@@ -24,6 +28,12 @@ class Simulator:
         self.use_ode = use_ode
         self.time = TimeManager()
         self.history: List[Dict[str, Any]] = []
+        rules_path = Path(__file__).resolve().parent.parent / "recommender" / "rules.yaml"
+        self.rule_engine = RuleEngine(
+            mode="rule_based",
+            rules_path=str(rules_path),
+            rule_version="version_A",
+        )
 
         # ------------------------------------------------------------------
         # Initialize unit operations
@@ -85,12 +95,13 @@ class Simulator:
     # ------------------------------------------------------------------
     # Simulation helpers
     # ------------------------------------------------------------------
-    def _record_state(self) -> None:
-        snapshot = {"minute": self.time.minute}
+    def _record_state(self) -> Dict[str, Any]:
+        snapshot: Dict[str, Any] = {"minute": self.time.minute}
         for name, unit in self.units.items():
             if hasattr(unit, "get_state"):
                 snapshot[name] = unit.get_state()
         self.history.append(snapshot)
+        return snapshot
 
     # ------------------------------------------------------------------
     def step(self, external_inputs: Optional[Dict[str, Any]] = None) -> None:
@@ -188,7 +199,11 @@ class Simulator:
             if self.verbose:
                 print(f"[t={self.time.minute}] Brain={brain_out} Gut={gut_out}")
 
-        self._record_state()
+        snapshot = self._record_state()
+        recommendations = self.rule_engine.get_recommendations(snapshot)
+        if self.verbose:
+            print(f"[t={self.time.minute}] Recommendations={recommendations}")
+        snapshot["recommendations"] = recommendations
         self.time.tick(60)
 
     # ------------------------------------------------------------------
