@@ -28,7 +28,6 @@ pip-wheel-metadata/
 .ipynb_checkpoints/
 
 # Environment & config
-.env
 *.yaml~
 *.json~
 
