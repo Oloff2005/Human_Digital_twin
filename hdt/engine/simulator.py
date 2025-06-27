@@ -24,7 +24,7 @@ class Simulator:
             "kidney": KidneyReactor(config["kidney"]),
             "muscle": MuscleEffector(config["muscle"]),
             "hormones": HormoneRouter(config.get("hormones", {})),
-            "lungs": LungReactor(config["lungs"]),
+            "lungs": LungReactor(**config["lungs"]),
             "storage": StorageUnit(config["storage"]),
             "pancreas": PancreaticValve(config["pancreas"]),
             "skin": SkinThermoregulator(config["skin"]),

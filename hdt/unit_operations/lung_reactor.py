@@ -1,40 +1,37 @@
 class LungReactor:
-    def __init__(self, config):
-        """
-        Simulates gas exchange in the lungs (O2 uptake and CO2 exhalation).
+    def __init__(self, oxygen_uptake_rate=320, co2_exhale_rate=250):
+        """Simulate lung gas exchange for oxygen uptake and CO₂ removal.
 
-        Args:
-            config (dict): {
-                - oxygen_uptake_rate (mL/min)
-                - co2_exhale_rate (mL/min)
-            }
+        Parameters
+        ----------
+        oxygen_uptake_rate : float, optional
+            Amount of oxygen delivered to the blood per minute (mL/min).
+        co2_exhale_rate : float, optional
+            Maximum amount of CO₂ that can be exhaled per minute (mL/min).
         """
-        self.oxygen_uptake_rate = config.get("oxygen_uptake_rate", 320)
-        self.co2_exhale_rate = config.get("co2_exhale_rate", 250)
+
+        self.oxygen_uptake_rate = oxygen_uptake_rate
+        self.co2_exhale_rate = co2_exhale_rate
+
+        # Internal state used by the ODE solver
+        self.co2_pool = 0.0
+        self._co2_in_rate = 0.0  # rate of CO₂ coming from tissues (mL/min)
 
     def exchange(self, duration_min=1, co2_in=0):
-        """
-        Models oxygen delivery and CO2 removal.
+        """Perform discrete gas exchange for a given time step."""
 
-        Args:
-            duration_min (int): Duration in minutes
-            co2_in (float): CO2 from tissues (e.g. muscles), in mL
+        self.co2_pool += co2_in
 
-        Returns:
-            dict: {
-                'oxygen_to_blood': mL,
-                'co2_exhaled': mL,
-                'co2_remaining': mL
-            }
-        """
         oxygen_delivered = self.oxygen_uptake_rate * duration_min
-        co2_removed = min(self.co2_exhale_rate * duration_min, co2_in)
-        co2_remaining = max(0, co2_in - co2_removed)
+        exhale_capacity = self.co2_exhale_rate * duration_min
+
+        co2_exhaled = min(exhale_capacity, self.co2_pool)
+        self.co2_pool -= co2_exhaled
 
         return {
             "oxygen_to_blood": oxygen_delivered,
-            "co2_exhaled": co2_removed,
-            "co2_remaining": co2_remaining
+            "co2_exhaled": co2_exhaled,
+            "co2_remaining": self.co2_pool,
         }
 
     def step(self, duration_min=1, co2_in=0):
@@ -45,3 +42,18 @@ class LungReactor:
             dict: Gas exchange outputs
         """
         return self.exchange(duration_min, co2_in)
+
+    # ------------------------------------------------------------------
+    # ODE compatibility methods
+    def get_state(self):
+        return {"lung_co2": self.co2_pool}
+
+    def set_state(self, state_dict):
+        self.co2_pool = state_dict["lung_co2"]
+
+    def derivatives(self, t, state):
+        """Rate of change of CO₂ in the lung pool."""
+        co2_pool = state["lung_co2"]
+        exhale = min(self.co2_exhale_rate, co2_pool)
+        d_co2_dt = self._co2_in_rate - exhale
+        return {"lung_co2": d_co2_dt}
