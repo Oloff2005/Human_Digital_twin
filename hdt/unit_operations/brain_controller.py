@@ -1,4 +1,7 @@
-class BrainController:
+from .base_unit import BaseUnit
+
+
+class BrainController(BaseUnit):
     def __init__(self, config):
         """Central logic hub for hormonal and behavioral control."""
 
@@ -13,6 +16,14 @@ class BrainController:
         self.time_of_day = 0  # hour 0–23
 
         # Optional output overrides
+        self._override = {}
+        
+    def reset(self):
+        """Reset internal controller state."""
+        self.stress_level = 0.0
+        self.hunger_level = 0.5
+        self.sleep_pressure = 0.0
+        self.time_of_day = 0
         self._override = {}
 
     def integrate_inputs(self, muscle_signals, gut_signals, wearable_signals, time_of_day):

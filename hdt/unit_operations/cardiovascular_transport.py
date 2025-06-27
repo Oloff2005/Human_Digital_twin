@@ -1,4 +1,7 @@
-class CardiovascularTransport:
+from .base_unit import BaseUnit
+
+
+class CardiovascularTransport(BaseUnit):
     def __init__(self, config):
         """Cardiovascular transport of nutrients and hormones.
 
@@ -28,7 +31,14 @@ class CardiovascularTransport:
             "amino_acids": 0.0,
             "water": 0.0,
         }
-
+    def reset(self):
+        """Reset nutrient pools and absorbed inputs."""
+        self.cv_glucose = 0.0
+        self.cv_fatty_acids = 0.0
+        self.cv_amino_acids = 0.0
+        self.cv_water = 0.0
+        self._absorbed = {"glucose": 0.0, "fatty_acids": 0.0, "amino_acids": 0.0, "water": 0.0}
+    
     def distribute(self, absorbed_nutrients):
         """Route nutrients from gut to liver and systemic tissues.
 

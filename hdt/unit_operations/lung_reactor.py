@@ -1,5 +1,8 @@
-class LungReactor:
-     def __init__(self, config=None, oxygen_uptake_rate=320, co2_exhale_rate=250):
+from .base_unit import BaseUnit
+
+
+class LungReactor(BaseUnit):
+    def __init__(self, config=None, oxygen_uptake_rate=320, co2_exhale_rate=250):
         """Simulate lung gas exchange for oxygen uptake and CO₂ removal.
 
         Parameters
@@ -23,7 +26,12 @@ class LungReactor:
         self.co2_pool = 0.0
         self._co2_in_rate = 0.0  # rate of CO₂ coming from tissues (mL/min)
 
-     def exchange(self, duration_min=1, co2_in=0):
+    def reset(self):
+        """Reset accumulated CO₂ pool."""
+        self.co2_pool = 0.0
+        self._co2_in_rate = 0.0
+
+    def exchange(self, duration_min=1, co2_in=0):
         """Perform discrete gas exchange for a given time step."""
 
         self.co2_pool += co2_in
@@ -40,7 +48,7 @@ class LungReactor:
             "co2_remaining": self.co2_pool,
         }
 
-     def step(self, duration_min=1, co2_in=0):
+    def step(self, duration_min=1, co2_in=0):
         """
         Execute one simulation step for the lungs.
 
@@ -51,13 +59,13 @@ class LungReactor:
 
     # ------------------------------------------------------------------
     # ODE compatibility methods
-     def get_state(self):
+    def get_state(self):
         return {"lung_co2": self.co2_pool}
 
-     def set_state(self, state_dict):
+    def set_state(self, state_dict):
         self.co2_pool = state_dict["lung_co2"]
 
-     def derivatives(self, t, state):
+    def derivatives(self, t, state):
         """Rate of change of CO₂ in the lung pool."""
         co2_pool = state["lung_co2"]
         exhale = min(self.co2_exhale_rate, co2_pool)

@@ -1,4 +1,7 @@
-class MuscleEffector:
+from .base_unit import BaseUnit
+
+
+class MuscleEffector(BaseUnit):
     def __init__(self, config):
         """
         Simulates energy usage in muscle based on physical activity and hormone influence.
@@ -11,6 +14,14 @@ class MuscleEffector:
         self.fat = 0.0
         self.ketones = 0.0
 
+        self.activity_level = "rest"
+        self.hormones = {"insulin": 0.6, "cortisol": 0.2}
+        
+    def reset(self):
+        """Reset internal substrate pools and settings."""
+        self.glucose = 0.0
+        self.fat = 0.0
+        self.ketones = 0.0
         self.activity_level = "rest"
         self.hormones = {"insulin": 0.6, "cortisol": 0.2}
 

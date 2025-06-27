@@ -1,7 +1,8 @@
 import math
+from .base_unit import BaseUnit
 
 
-class SleepRegulationCenter:
+class SleepRegulationCenter(BaseUnit):
     """Simulate circadian driven sleep pressure and recovery."""
 
     def __init__(self, config):
@@ -13,6 +14,12 @@ class SleepRegulationCenter:
         # Optional compatibility state
         self.hours_awake = 0
 
+        self._override = None
+
+    def reset(self):
+        """Reset sleep drive and overrides."""
+        self.sleep_drive = 0.5
+        self.hours_awake = 0
         self._override = None
 
     # ------------------------------------------------------------------

@@ -1,4 +1,7 @@
-class StorageUnit:
+from .base_unit import BaseUnit
+
+
+class StorageUnit(BaseUnit):
     def __init__(self, config):
         """
         ODE-compatible energy storage unit for glycogen and fat.
@@ -20,6 +23,13 @@ class StorageUnit:
         self.current_fat = config.get("initial_fat", 8000)
 
         # External inputs for dynamic routing
+        self._storage_inputs = {"glycogen_stored": 0.0, "fat_stored": 0.0}
+        self._glucagon_signal = 0.5
+
+    def reset(self):
+        """Reset stored nutrient amounts."""
+        self.current_glycogen = 0.0
+        self.current_fat = 0.0
         self._storage_inputs = {"glycogen_stored": 0.0, "fat_stored": 0.0}
         self._glucagon_signal = 0.5
 

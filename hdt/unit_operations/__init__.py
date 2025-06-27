@@ -1,3 +1,4 @@
+from .base_unit import BaseUnit
 from .gut_reactor import GutReactor
 from .liver_metabolic_router import LiverMetabolicRouter
 from .muscle_effector import MuscleEffector
@@ -11,6 +12,7 @@ from .skin_thermoregulator import SkinThermoregulator
 from .pancreatic_valve import PancreaticValve
 
 __all__ = [
+    "BaseUnit",
     "GutReactor",
     "LiverMetabolicRouter",
     "MuscleEffector",

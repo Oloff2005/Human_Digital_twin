@@ -1,4 +1,7 @@
-class HormoneRouter:
+from .base_unit import BaseUnit
+
+
+class HormoneRouter(BaseUnit):
     def __init__(self, dominance_rules=None):
         """
         Modulates hormone signals by enforcing dominance rules.
@@ -11,6 +14,15 @@ class HormoneRouter:
            "cortisol": ["insulin", "digestive_signal", "melatonin"],
            "glucagon": ["insulin"],
         }
+    def reset(self):
+        """No dynamic state to reset."""
+        pass
+
+    def get_state(self):
+        return {}
+
+    def set_state(self, state_dict):
+        pass
 
     def resolve(self, hormone_outputs):
         """

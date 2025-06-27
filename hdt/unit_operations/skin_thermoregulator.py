@@ -1,4 +1,7 @@
-class SkinThermoregulator:
+from .base_unit import BaseUnit
+
+
+class SkinThermoregulator(BaseUnit):
     """Simple model of skin thermoregulation.
 
     This class offers a lightweight representation of sweating and heat
@@ -29,6 +32,14 @@ class SkinThermoregulator:
         self.total_heat_loss = 0.0  # kcal
 
         # Inputs used by ``derivatives``
+        self._core_temp = self.vasodilation_temp_threshold
+        self._ambient_temp = 25.0
+        self._cortisol = 0.0
+        
+    def reset(self):
+        """Reset cumulative sweat and heat loss."""
+        self.total_sweat = 0.0
+        self.total_heat_loss = 0.0
         self._core_temp = self.vasodilation_temp_threshold
         self._ambient_temp = 25.0
         self._cortisol = 0.0

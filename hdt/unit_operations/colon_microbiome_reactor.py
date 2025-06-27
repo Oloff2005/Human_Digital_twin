@@ -1,4 +1,7 @@
-class ColonMicrobiomeReactor:
+from .base_unit import BaseUnit
+
+
+class ColonMicrobiomeReactor(BaseUnit):
     def __init__(self, config):
         """
         Simulates fiber fermentation, short-chain fatty acid (SCFA) production,
@@ -18,6 +21,15 @@ class ColonMicrobiomeReactor:
             "butyrate": 0.2
         })
         self.transit_time = config.get("transit_time", 480)  # 8 hours
+    def reset(self):
+        """No persistent state to reset."""
+        pass
+
+    def get_state(self):
+        return {}
+
+    def set_state(self, state_dict):
+        pass
 
     def process_residue(self, fiber_input):
         """

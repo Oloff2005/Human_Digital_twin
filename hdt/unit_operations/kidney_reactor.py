@@ -1,4 +1,7 @@
-class KidneyReactor:
+from .base_unit import BaseUnit
+
+
+class KidneyReactor(BaseUnit):
     def __init__(self, config):
         """
         Simulates renal filtration and excretion of urea, water, and electrolytes.
@@ -11,6 +14,15 @@ class KidneyReactor:
         """
         self.urea_clearance = config.get("urea_clearance", 55)  # mL/min
         self.fluid_reabsorption = config.get("fluid_reabsorption", 0.96)
+    def reset(self):
+        """No internal state to reset for now."""
+        pass
+
+    def get_state(self):
+        return {}
+
+    def set_state(self, state_dict):
+        pass
 
     def filter(self, blood_input, duration_min=60):
         """

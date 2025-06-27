@@ -1,4 +1,7 @@
-class PancreaticValve:
+from .base_unit import BaseUnit
+
+
+class PancreaticValve(BaseUnit):
     def __init__(self, config):
         """
         Simulates insulin/glucagon release in response to blood glucose.
@@ -17,6 +20,13 @@ class PancreaticValve:
         self.glucagon_level = config.get("initial_glucagon", 0.5)
 
         # Inputs used by derivatives()
+        self._blood_glucose = self.insulin_threshold
+        self._rate_of_change = 0.0
+        
+    def reset(self):
+        """Reset hormone levels and cached inputs."""
+        self.insulin_level = 0.5
+        self.glucagon_level = 0.5
         self._blood_glucose = self.insulin_threshold
         self._rate_of_change = 0.0
 

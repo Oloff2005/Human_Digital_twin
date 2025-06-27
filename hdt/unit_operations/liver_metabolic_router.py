@@ -1,6 +1,7 @@
-# hdt/units/liver.py
+from .base_unit import BaseUnit
 
-class LiverMetabolicRouter:
+
+class LiverMetabolicRouter(BaseUnit):
     def __init__(self, config):
         """
         Liver router that handles nutrient processing, storage, and mobilization.
@@ -23,6 +24,13 @@ class LiverMetabolicRouter:
         self.current_glycogen = 0.0
 
         # External inputs for derivative logic
+        self._incoming_glucose = 0.0
+        self._insulin = 0.5
+        self._glucagon = 0.5
+    def reset(self):
+        """Reset internal liver state."""
+        self.liver_glucose = 0.0
+        self.current_glycogen = 0.0
         self._incoming_glucose = 0.0
         self._insulin = 0.5
         self._glucagon = 0.5

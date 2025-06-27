@@ -1,6 +1,7 @@
-# hdt/units/gut.py
+from .base_unit import BaseUnit
 
-class GutReactor:
+
+class GutReactor(BaseUnit):
     def __init__(self, config):
         """
         Simulates gastrointestinal processing of ingested food using ODEs or static digestion.
@@ -17,6 +18,13 @@ class GutReactor:
         self.absorption_delay = config.get("absorption_delay", 10)  # not used yet
 
         # Internal state variables for ODE simulation
+        self.glucose = 0.0
+        self.fatty_acids = 0.0
+        self.amino_acids = 0.0
+        self.water = 0.0
+        
+    def reset(self):
+        """Reset internal nutrient pools."""
         self.glucose = 0.0
         self.fatty_acids = 0.0
         self.amino_acids = 0.0
