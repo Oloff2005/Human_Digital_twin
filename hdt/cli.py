@@ -1,36 +1,60 @@
 import argparse
 import json
-import os
-import sys
-
-# Allow running this script directly without installing the package
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from pathlib import Path
 
 from hdt.engine.run_simulator import run_simulator
 
-def main():
-    parser = argparse.ArgumentParser(description="Run the Human Digital Twin simulation.")
-    parser.add_argument("--input", type=str, required=True, help="Path to input JSON file")
-    parser.add_argument("--steps", type=int, default=10, help="Number of simulation steps")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose debug output")
-    parser.add_argument("--profile", type=str, default="beginner", choices=["beginner", "active", "athlete"], help="Simulation profile")
+PACKAGE_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = PACKAGE_ROOT.parent
+DEFAULT_CONFIG = PACKAGE_ROOT / "config" / "units_config_active.yaml"
+DEFAULT_INPUT = PROJECT_ROOT / "data" / "sample_inputs.json"
 
-    args = parser.parse_args()
-
-    # Choose correct config path
-    config_path = f"hdt/config/units_config_{args.profile}.yaml"
-
-    # Run the simulation
-    result = run_simulator(
-        config_path=config_path,
-        input_path=args.input,
+def _run_command(args: argparse.Namespace) -> None:
+    """Execute the simulation and handle output."""
+    results = run_simulator(
+        config_path=str(args.config),
+        input_path=str(DEFAULT_INPUT),
         steps=args.steps,
-        verbose=args.verbose
+        verbose=False,
     )
 
-    # Print summary output
-    print("\n🧠 Final Digital Twin State:")
-    print(json.dumps(result, indent=2))
+    if args.log:
+        log_path = Path(args.log)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(log_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2)
+    else:
+        print(json.dumps(results, indent=2))
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Entry point for the HDT command line interface."""
+    parser = argparse.ArgumentParser(prog="hdt", description="Human Digital Twin CLI")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    run_parser = subparsers.add_parser("run", help="Run a simulation")
+    run_parser.add_argument(
+        "--steps",
+        type=int,
+        default=1,
+        help="Number of simulation steps",
+    )
+
+    run_parser.add_argument(
+        "--log",
+        type=str,
+        help="Optional path to write the simulation log",
+    )
+    run_parser.add_argument(
+        "--config",
+        type=str,
+        default=str(DEFAULT_CONFIG),
+        help="Path to unit configuration YAML",
+    )
+    run_parser.set_defaults(func=_run_command)
+
+    args = parser.parse_args(argv)
+    args.func(args)
 
 if __name__ == "__main__":
     main()

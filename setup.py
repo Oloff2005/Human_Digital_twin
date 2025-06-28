@@ -21,6 +21,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'hdt=hdt.cli:main',
             'run_hdt=hdt.cli:main',
         ],
     },
