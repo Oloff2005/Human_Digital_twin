@@ -10,8 +10,8 @@ from hdt.core.time_manager import TimeManager
 from hdt.engine.solver import ODESolver
 from hdt.inputs.input_parser import InputParser
 from hdt.inputs.signal_normalizer import SignalNormalizer
-from hdt.streams.stream import Stream
-from hdt.streams.stream_map import STREAM_MAP
+from hdt.streams.stream import Stream, BidirectionalStreamManager
+from hdt.streams.stream_map import STREAM_MAP, BIDIRECTIONAL_PAIRS, BidirectionalPair
 
 
 class Simulator:
@@ -83,6 +83,17 @@ class Simulator:
             for conn in STREAM_MAP
         }
 
+         # Bidirectional stream managers
+        self.bidir_streams: Dict[frozenset, BidirectionalStreamManager] = {}
+        for pair in BIDIRECTIONAL_PAIRS:
+            manager = BidirectionalStreamManager(
+                pair.a,
+                pair.b,
+                delay_ab=pair.delay_ab,
+                delay_ba=pair.delay_ba,
+            )
+            self.bidir_streams[frozenset({pair.a, pair.b})] = manager
+
         # Optional ODE solver setup
         self.solver: Optional[ODESolver] = None
         if self.use_ode:
@@ -144,30 +155,51 @@ class Simulator:
                     self.streams[(conn.origin, conn.destination)].push(hormone_out, self.time.minute)
 
             gut_inputs = external_inputs.get("meal", {})
-            gut_out = self.units["Gut"].step(meal_input=gut_inputs, duration_min=60, hormones=hormone_out)
-            self.streams[("Gut", "HeartCirculation")].push(gut_out["absorbed"], self.time.minute)
+            gut_out = self.units["Gut"].step(
+                meal_input=gut_inputs, duration_min=60, hormones=hormone_out
+            )
+            self.streams[("Gut", "Liver")].push(gut_out["absorbed"], self.time.minute)
 
             colon_out = self.units["Colon"].step(gut_out["residue"].get("fiber", 0))
 
-            cv_inputs = {}
-            for payload in self.streams[("Gut", "HeartCirculation")].step(self.time.minute):
+            portal_inputs = {}
+            for payload in self.streams[("Gut", "Liver")].step(self.time.minute):
                 if isinstance(payload, dict):
-                    cv_inputs.update(payload)
-            cardio_out = self.units["HeartCirculation"].step(cv_inputs)
+                   portal_inputs.update(payload)
 
             mobilized = self.units["Storage"].mobilize(
                 signal_strength=hormone_out.get("glucagon", 0.5), duration_hr=1
             )
 
             liver_out = self.units["Liver"].route(
-                portal_input=cardio_out["to_liver"],
+                portal_input=portal_inputs,
                 microbiome_input=colon_out["scfa_output"],
                 mobilized_reserves=mobilized["mobilized"],
                 signals=hormone_out,
             )
+            heart_payload = {
+                "glucose": liver_out["to_muscle_aerobic"].get("glucose", 0),
+                "fatty_acids": liver_out["to_muscle_aerobic"].get("fat", 0),
+                "amino_acids": 0,
+                "water": portal_inputs.get("water", 0),
+            }
+            self.streams[("Liver", "HeartCirculation")].push(
+                heart_payload, self.time.minute
+            )
+
+            cv_inputs = {}
+            for payload in self.streams[("Liver", "HeartCirculation")].step(self.time.minute):
+                if isinstance(payload, dict):
+                    cv_inputs.update(payload)
+            cardio_out = self.units["HeartCirculation"].step(cv_inputs)
+
+            muscle_inputs = {
+                "glucose": cardio_out["to_systemic"].get("glucose", 0),
+                "fat": cardio_out["to_systemic"].get("fatty_acids", 0),
+            }
 
             muscle_out = self.units["Muscle"].metabolize(
-                inputs=liver_out["to_muscle_aerobic"],
+                inputs=muscle_inputs,
                 activity_level=external_inputs.get("activity_level", "rest"),
                 hormones=hormone_out,
             )

@@ -1,6 +1,17 @@
 from dataclasses import dataclass
 from typing import List
 
+
+
+@dataclass
+class BidirectionalPair:
+    """Defines a reversible link between two units with optional delays."""
+
+    a: str
+    b: str
+    delay_ab: int = 0
+    delay_ba: int = 0
+
 @dataclass
 class Connection:
     """Represents a directional link between two units."""
@@ -37,4 +48,10 @@ STREAM_MAP: List[Connection] = [
     Connection("HormoneRouter", "Brain"),
 ]
 
-__all__ = ["Connection", "STREAM_MAP"]
+# Reversible flows with potentially different delays in each direction
+BIDIRECTIONAL_PAIRS: List[BidirectionalPair] = [
+    BidirectionalPair("HeartCirculation", "Storage"),
+    BidirectionalPair("Liver", "Muscle"),
+]
+
+__all__ = ["Connection", "BidirectionalPair", "STREAM_MAP", "BIDIRECTIONAL_PAIRS"]
