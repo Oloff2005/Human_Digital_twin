@@ -243,3 +243,7 @@ class Simulator:
         for _ in range(steps):
             self.step(external_inputs)
         return self.history
+    
+if __name__ == "__main__":
+    print("🚀 Human Digital Twin Simulation Started in Docker!")
+    # Call your main simulation logic here
