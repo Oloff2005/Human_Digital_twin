@@ -1,7 +1,10 @@
 import json
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+try:  # pragma: no cover - optional dependency
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    plt = None
 
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config, load_sim_params
@@ -16,6 +19,10 @@ def create_plots(history, baseline, heart_rate_input, output_path):
         output_path (Path): location to save the image.
     """
 
+    if plt is None:
+        # Matplotlib not available; skip plotting
+        return
+    
     minutes = [snap.get("minute", 0) for snap in history]
     glycogen_pred = [snap.get("Liver", {}).get("liver_glycogen") for snap in history]
     heart_rate_pred = [heart_rate_input for _ in history]
@@ -57,7 +64,8 @@ def create_plots(history, baseline, heart_rate_input, output_path):
     fig.savefig(output_path)
     plt.close(fig)
 
-def main():
+def run_calibration(save_logs: bool = True):
+    """Run a single calibration step and optionally save logs."""
     # Ensure log directory exists
     log_dir = Path("calibration_logs")
     log_dir.mkdir(exist_ok=True)
@@ -83,6 +91,7 @@ def main():
 
     # Collect outputs for comparison
     outputs = {
+        "liver_glucose": snapshot.get("Liver", {}).get("liver_glucose"),
         "liver_glycogen": snapshot.get("Liver", {}).get("liver_glycogen"),
         "heart_rate": raw_inputs.get("heart_rate"),
     }
@@ -90,8 +99,9 @@ def main():
     # Compute errors only for keys available in baseline
     errors = {}
     for key, output_val in outputs.items():
-        if key in baseline and output_val is not None:
-            errors[key] = abs(output_val - baseline[key])
+        baseline_val = baseline.get(key, 0.0)
+        if output_val is not None:
+            errors[key] = abs(output_val - baseline_val)
 
     mae = sum(errors.values()) / len(errors) if errors else None
 
@@ -104,18 +114,25 @@ def main():
 
     # Print comparison results
     for k, err in errors.items():
-        print(f"{k}: output={outputs[k]} baseline={baseline[k]} error={err}")
+        base_val = baseline.get(k, 0.0)
+        print(f"{k}: output={outputs[k]} baseline={base_val} error={err}")
     if mae is not None:
         print(f"Mean Absolute Error: {mae}")
 
-    # Save to log file
-    with open(log_dir / "last_run.json", "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2)
+    if save_logs:
+        # Save to log file
+        with open(log_dir / "last_run.json", "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2)
 
-    # Generate calibration plots
-    plot_path = log_dir / "predicted_vs_actual.png"
-    create_plots(history, baseline, raw_inputs.get("heart_rate"), plot_path)
+        # Generate calibration plots
+        plot_path = log_dir / "predicted_vs_actual.png"
+        create_plots(history, baseline, raw_inputs.get("heart_rate"), plot_path)
 
+    return results
+
+
+def main():
+    run_calibration(save_logs=True)
 
 if __name__ == "__main__":
     main()

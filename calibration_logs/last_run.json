@@ -1,0 +1,17 @@
+{
+  "outputs": {
+    "liver_glucose": 0.0,
+    "liver_glycogen": 0.0,
+    "heart_rate": 68
+  },
+  "baseline": {
+    "liver_glycogen": 100.0,
+    "heart_rate": 65
+  },
+  "errors": {
+    "liver_glucose": 0.0,
+    "liver_glycogen": 100.0,
+    "heart_rate": 3
+  },
+  "mae": 34.333333333333336
+}
