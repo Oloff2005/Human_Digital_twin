@@ -38,6 +38,8 @@ if "simulator" not in st.session_state:
         "cortisol": [],
         "heart_rate": [],
         "sleep_quality": [],
+        "glycogen": [],
+        "sleep_drive": [],
     }
 
 sim = st.session_state.simulator
@@ -57,7 +59,9 @@ intensity = st.sidebar.selectbox(
     key="intensity",
 )
 submitted = st.sidebar.button("Submit")
-
+time_window = st.sidebar.slider(
+    "History window (hours)", min_value=1, max_value=24, value=12, step=1
+)
 # ---------------------------------------------------------------------------
 # Simulation step on submit
 # ---------------------------------------------------------------------------
@@ -79,17 +83,22 @@ if submitted:
     sim.step(external)
     snapshot = sim.history[-1]
     st.session_state.history.append(snapshot)
+    st.session_state.current_state = {name: unit.get_state() for name, unit in sim.units.items()}
 
     # Derived metrics
     glucose = snapshot.get("Liver", {}).get("liver_glucose", 0.0)
     cortisol = min(1.0, snapshot.get("BrainController", {}).get("stress_level", 0.0) * config.get("brain", {}).get("cortisol_threshold", 1.0))
     heart_rate = st.session_state.parsed_signals.get("BrainController", {}).get("heart_rate", 0) * 100
     sleep_quality = (1 - snapshot.get("SleepRegulationCenter", {}).get("sleep_drive", 0.0)) * 100
+    glycogen = snapshot.get("Storage", {}).get("storage_glycogen", 0.0)
+    sleep_drive = snapshot.get("SleepRegulationCenter", {}).get("sleep_drive", 0.0)
 
     st.session_state.metrics["glucose"].append(glucose)
     st.session_state.metrics["cortisol"].append(cortisol)
     st.session_state.metrics["heart_rate"].append(heart_rate)
     st.session_state.metrics["sleep_quality"].append(sleep_quality)
+    st.session_state.metrics["glycogen"].append(glycogen)
+    st.session_state.metrics["sleep_drive"].append(sleep_drive)
 
 # ---------------------------------------------------------------------------
 # Display current state
@@ -104,6 +113,15 @@ if st.session_state.metrics["glucose"]:
     st.metric("Heart Rate", f"{st.session_state.metrics['heart_rate'][last_idx]:.0f}")
     st.metric("Sleep Quality", f"{st.session_state.metrics['sleep_quality'][last_idx]:.1f}")
 
+    glycogen_level = st.session_state.metrics["glycogen"][last_idx]
+    max_gly = config.get("storage", {}).get("max_glycogen", 1.0)
+    st.subheader("Energy Reserves")
+    st.progress(min(1.0, glycogen_level / max_gly))
+
+    circadian_val = 1.0 - st.session_state.metrics["sleep_drive"][last_idx]
+    st.subheader("Circadian Rhythm")
+    st.progress(max(0.0, min(1.0, circadian_val)))
+
     st.subheader("Lifestyle Recommendations")
     recs = st.session_state.history[-1].get("recommendations", [])
     for rec in recs:
@@ -111,11 +129,7 @@ if st.session_state.metrics["glucose"]:
 
     st.subheader("Trends")
     df = pd.DataFrame(st.session_state.metrics)
-    fig, ax = plt.subplots()
-    sns.lineplot(data=df["glucose"], ax=ax, marker="o")
-    ax.set_ylabel("Glucose")
-    ax.set_xlabel("Step")
-    ax.set_title("Glucose Over Time")
-    st.pyplot(fig)
+    df_window = df.tail(time_window)
+    st.line_chart(df_window[["glucose", "heart_rate", "cortisol", "glycogen"]])
 else:
     st.write("Enter inputs and submit to run the simulation.")
