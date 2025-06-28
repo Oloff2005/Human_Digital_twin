@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  hdt_simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
