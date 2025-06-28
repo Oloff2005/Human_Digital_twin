@@ -29,9 +29,12 @@ if "simulator" not in st.session_state:
     parser = InputParser(str(MAPPING_PATH))
     parsed = parser.parse(str(SAMPLE_INPUT))
     signals = SignalNormalizer().normalize(parsed)
-    st.session_state.simulator = Simulator(config=config, wearable_inputs=signals, verbose=False)
+    st.session_state.simulator = Simulator(
+        config=config, wearable_inputs=signals, verbose=False
+    )
     st.session_state.config = config
     st.session_state.parsed_signals = parsed
+    st.session_state.normalized_signals = signals
     st.session_state.history = []
     st.session_state.metrics = {
         "glucose": [],
@@ -88,7 +91,9 @@ if submitted:
     # Derived metrics
     glucose = snapshot.get("Liver", {}).get("liver_glucose", 0.0)
     cortisol = min(1.0, snapshot.get("BrainController", {}).get("stress_level", 0.0) * config.get("brain", {}).get("cortisol_threshold", 1.0))
-    heart_rate = st.session_state.parsed_signals.get("BrainController", {}).get("heart_rate", 0) * 100
+    heart_rate = st.session_state.parsed_signals.get("BrainController", {}).get(
+        "heart_rate", 0
+    )
     sleep_quality = (1 - snapshot.get("SleepRegulationCenter", {}).get("sleep_drive", 0.0)) * 100
     glycogen = snapshot.get("Storage", {}).get("storage_glycogen", 0.0)
     sleep_drive = snapshot.get("SleepRegulationCenter", {}).get("sleep_drive", 0.0)
