@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from hdt.engine.simulator import Simulator
@@ -22,6 +23,14 @@ MAPPING_PATH = PACKAGE_ROOT / "config" / "wearable_mapping.json"
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or specify frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Simulation globals
 simulator: Optional[Simulator] = None
