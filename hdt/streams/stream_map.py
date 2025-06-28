@@ -7,20 +7,34 @@ class Connection:
     origin: str
     destination: str
 
-
+# Biologically realistic flow map for the Human Digital Twin simulation
 STREAM_MAP: List[Connection] = [
-    Connection("Gut", "HeartCirculation"),
-    Connection("HeartCirculation", "Liver"),
+    # Nutrient absorption via portal system
+    Connection("Gut", "Liver"),                        # Nutrients absorbed enter liver via portal vein
+    Connection("Liver", "HeartCirculation"),           # Processed nutrients enter systemic circulation
+
+    # Distribution to major organs and systems
     Connection("HeartCirculation", "Muscle"),
     Connection("HeartCirculation", "Storage"),
+    Connection("HeartCirculation", "Brain"),
+    Connection("HeartCirculation", "Gut"),             # Supplies blood back to the gut (e.g., oxygen, hormones)
+
+    # Return pathways (waste products, metabolic byproducts)
+    Connection("Muscle", "HeartCirculation"),          # CO₂, lactate return
+    Connection("Storage", "HeartCirculation"),         # Mobilized energy (glucose, fatty acids)
+
+    # Secondary nutrient redistribution
     Connection("Liver", "Muscle"),
     Connection("Liver", "Storage"),
+
+    # Hormonal and control signal routing
     Connection("BrainController", "HormoneRouter"),
     Connection("HormoneRouter", "Gut"),
     Connection("HormoneRouter", "HeartCirculation"),
     Connection("HormoneRouter", "Liver"),
     Connection("HormoneRouter", "Muscle"),
     Connection("HormoneRouter", "Storage"),
+    Connection("HormoneRouter", "Brain"),
 ]
 
 __all__ = ["Connection", "STREAM_MAP"]

@@ -1,48 +1,21 @@
-"""Stream utilities for inter-unit communication.
-
-This module defines a simple :class:`Stream` class that represents a
-uni-directional connection between two unit operations.  Each stream
-can buffer payloads that are pushed into it and releases them after a
-configurable delay.  The design is intentionally lightweight so that
-unit tests can run without heavy dependencies.
-"""
-
 from collections import deque
 from typing import Any, Deque, List, Tuple
 
 
 class Stream:
-    """Directional biochemical or signal flow between unit operations."""
+    """Unidirectional biochemical or signal flow between two unit operations."""
 
     def __init__(self, source: str, target: str, delay: int = 0) -> None:
-        """Create a new stream.
-
-        Parameters
-        ----------
-        source: str
-            Name of the originating unit.
-        target: str
-            Name of the destination unit.
-        delay: int, optional
-            Number of simulation steps before a pushed payload becomes
-            available to the target.  Defaults to ``0``.
-        """
         self.source = source
         self.target = target
         self.delay = delay
         self._buffer: Deque[Tuple[int, Any]] = deque()
 
     def push(self, payload: Any, timestamp: int) -> None:
-        """Push ``payload`` into the stream.
-
-        The payload will become available ``delay`` steps after the given
-        ``timestamp``.
-        """
         deliver_time = timestamp + self.delay
         self._buffer.append((deliver_time, payload))
 
     def pull(self, timestamp: int) -> List[Any]:
-        """Retrieve all payloads whose delivery time is <= ``timestamp``."""
         ready: List[Any] = []
         while self._buffer and self._buffer[0][0] <= timestamp:
             _, data = self._buffer.popleft()
@@ -50,8 +23,40 @@ class Stream:
         return ready
 
     def step(self, timestamp: int) -> List[Any]:
-        """Simulation-friendly interface returning ready payloads."""
         return self.pull(timestamp)
 
-    def __repr__(self) -> str:  # pragma: no cover - trivial
+    def __repr__(self) -> str:
         return f"<Stream {self.source}→{self.target} delay={self.delay}>"
+
+class BidirectionalStreamManager:
+    """A reversible stream between two unit operations."""
+
+    def __init__(self, unit_a: str, unit_b: str, delay_ab: int = 0, delay_ba: int = 0) -> None:
+        """Creates two directional streams: A→B and B→A."""
+        self.ab = Stream(unit_a, unit_b, delay=delay_ab)
+        self.ba = Stream(unit_b, unit_a, delay=delay_ba)
+
+    def push(self, source: str, payload: Any, timestamp: int) -> None:
+        """Push payload from source to the other unit."""
+        if source == self.ab.source:
+            self.ab.push(payload, timestamp)
+        elif source == self.ba.source:
+            self.ba.push(payload, timestamp)
+        else:
+            raise ValueError(f"Source '{source}' is not part of this bidirectional stream.")
+
+    def pull(self, target: str, timestamp: int) -> List[Any]:
+        """Pull payloads targeted at the given unit."""
+        if target == self.ab.target:
+            return self.ab.pull(timestamp)
+        elif target == self.ba.target:
+            return self.ba.pull(timestamp)
+        else:
+            raise ValueError(f"Target '{target}' is not part of this bidirectional stream.")
+
+    def step(self, unit_name: str, timestamp: int) -> List[Any]:
+        """Simulation-friendly step function for one unit."""
+        return self.pull(unit_name, timestamp)
+
+    def __repr__(self) -> str:
+        return f"<BidirectionalStream {self.ab.source}⇄{self.ab.target}>"
