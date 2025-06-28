@@ -1,9 +1,61 @@
 import json
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config, load_sim_params
 
+def create_plots(history, baseline, heart_rate_input, output_path):
+    """Generate calibration plots.
+
+    Args:
+        history (list[dict]): simulation history snapshots.
+        baseline (dict): baseline target values.
+        heart_rate_input (float): input heart rate value.
+        output_path (Path): location to save the image.
+    """
+
+    minutes = [snap.get("minute", 0) for snap in history]
+    glycogen_pred = [snap.get("Liver", {}).get("liver_glycogen") for snap in history]
+    heart_rate_pred = [heart_rate_input for _ in history]
+
+    fig, axes = plt.subplots(2, 1, figsize=(8, 8))
+
+    # Predicted vs baseline values
+    axes[0].plot(minutes, glycogen_pred, label="predicted_liver_glycogen")
+    axes[0].hlines(
+        baseline.get("liver_glycogen"), minutes[0], minutes[-1],
+        colors="r", linestyles="--", label="baseline_liver_glycogen"
+    )
+    axes[0].set_ylabel("Liver Glycogen")
+
+    ax_hr = axes[0].twinx()
+    ax_hr.plot(minutes, heart_rate_pred, color="g", label="predicted_heart_rate")
+    ax_hr.hlines(
+        baseline.get("heart_rate"), minutes[0], minutes[-1],
+        colors="orange", linestyles="--", label="baseline_heart_rate"
+    )
+    ax_hr.set_ylabel("Heart Rate")
+
+    lines1, labels1 = axes[0].get_legend_handles_labels()
+    lines2, labels2 = ax_hr.get_legend_handles_labels()
+    axes[0].legend(lines1 + lines2, labels1 + labels2, loc="best")
+    axes[0].set_title("Predicted vs Baseline")
+
+    # Error over time
+    glycogen_err = [abs(p - baseline.get("liver_glycogen", 0)) for p in glycogen_pred]
+    hr_err = [abs(p - baseline.get("heart_rate", 0)) for p in heart_rate_pred]
+    axes[1].plot(minutes, glycogen_err, label="liver_glycogen_error")
+    axes[1].plot(minutes, hr_err, label="heart_rate_error")
+    axes[1].set_xlabel("Minute")
+    axes[1].set_ylabel("Absolute Error")
+    axes[1].legend()
+    axes[1].set_title("Error Over Time")
+
+    fig.tight_layout()
+    fig.savefig(output_path)
+    plt.close(fig)
 
 def main():
     # Ensure log directory exists
@@ -59,6 +111,10 @@ def main():
     # Save to log file
     with open(log_dir / "last_run.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
+
+    # Generate calibration plots
+    plot_path = log_dir / "predicted_vs_actual.png"
+    create_plots(history, baseline, raw_inputs.get("heart_rate"), plot_path)
 
 
 if __name__ == "__main__":
