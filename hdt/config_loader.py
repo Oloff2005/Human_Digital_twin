@@ -4,8 +4,9 @@ from typing import Any, Dict, List, Tuple, cast
 
 try:
     import yaml  # type: ignore
+    yaml_lib = yaml
 except ModuleNotFoundError:  # pragma: no cover - optional dependency may be absent
-    yaml = None
+    yaml_lib = None
 
 
 def _parse_scalar(value: str) -> Any:
@@ -73,15 +74,15 @@ def _simple_yaml_load(path: str) -> Dict[str, Any]:
 
 def load_units_config(path: str) -> Dict[str, Any]:
     """Load unit configuration YAML."""
-    if yaml is not None:
+    if yaml_lib is not None:
         with open(path, "r", encoding="utf-8") as f:
-            return cast(Dict[str, Any], yaml.safe_load(f))
+            return cast(Dict[str, Any], yaml_lib.safe_load(f))
     return _simple_yaml_load(path)
 
 
 def load_sim_params(path: str) -> Dict[str, Any]:
     """Load simulator parameter YAML."""
-    if yaml is not None:
+    if yaml_lib is not None:
         with open(path, "r", encoding="utf-8") as f:
-            return cast(Dict[str, Any], yaml.safe_load(f))
+            return cast(Dict[str, Any], yaml_lib.safe_load(f))
     return _simple_yaml_load(path)
