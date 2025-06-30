@@ -14,6 +14,7 @@ class KidneyReactor(BaseUnit):
         """
         self.urea_clearance = config.get("urea_clearance", 55)  # mL/min
         self.fluid_reabsorption = config.get("fluid_reabsorption", 0.96)
+
     def reset(self):
         """No internal state to reset for now."""
         pass
@@ -48,7 +49,9 @@ class KidneyReactor(BaseUnit):
             }
         """
         # Urea output
-        urea_out = min(blood_input.get("urea", 0), self.urea_clearance * duration_min / 1000)  # mmol
+        urea_out = min(
+            blood_input.get("urea", 0), self.urea_clearance * duration_min / 1000
+        )  # mmol
 
         # Water output
         total_water = blood_input.get("water", 0)
@@ -59,14 +62,8 @@ class KidneyReactor(BaseUnit):
         retained_urea = blood_input.get("urea", 0) - urea_out
 
         return {
-            "urine_output": {
-                "urea": urea_out,
-                "water": water_out
-            },
-            "retained": {
-                "urea": retained_urea,
-                "water": retained_water
-            }
+            "urine_output": {"urea": urea_out, "water": water_out},
+            "retained": {"urea": retained_urea, "water": retained_water},
         }
 
     def step(self, blood_input, duration_min=60):

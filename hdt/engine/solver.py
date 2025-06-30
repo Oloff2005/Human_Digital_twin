@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # can run in a minimal environment.  The solver below implements a very simple
 # explicit Euler integrator using only the Python standard library.
 
+
 class ODESolver:
     """A very small ODE solver used in the tests.
 
@@ -35,7 +36,9 @@ class ODESolver:
                 self.state_vars.append(var)
                 self.var_to_unit[var] = unit
 
-    def _combined_derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
+    def _combined_derivatives(
+        self, t: float, state: Dict[str, float]
+    ) -> Dict[str, float]:
         """Compute derivatives for the full system as a flat dictionary."""
         derivatives = {}
         for unit in self.units:
@@ -50,16 +53,16 @@ class ODESolver:
         y0: Dict[str, float],
         t_eval: Optional[List[float]] = None,
     ) -> List[Dict[str, Any]]:
-      """Integrate the system using a simple Euler method."""
+        """Integrate the system using a simple Euler method."""
 
-      if t_eval is None:
+        if t_eval is None:
             t_eval = [t_span[0], t_span[1]]
-      
-      current_state = dict(y0)
-      current_t = t_eval[0]
-      results = []
 
-      for next_t in t_eval:
+        current_state = dict(y0)
+        current_t = t_eval[0]
+        results = []
+
+        for next_t in t_eval:
             # Record the state at the beginning of the step
             results.append({"t": current_t, "state": dict(current_state)})
 
@@ -70,9 +73,9 @@ class ODESolver:
                     current_state[var] += derivs[var] * dt
                 current_t = next_t
 
-      # Append the final state if the last evaluation time was beyond the
+        # Append the final state if the last evaluation time was beyond the
         # last recorded time point.
-      if results and results[-1]["t"] != current_t:
+        if results and results[-1]["t"] != current_t:
             results.append({"t": current_t, "state": dict(current_state)})
 
-      return results
+        return results

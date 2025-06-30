@@ -17,7 +17,7 @@ class BrainController(BaseUnit):
 
         # Optional output overrides
         self._override = {}
-        
+
     def reset(self):
         """Reset internal controller state."""
         self.stress_level = 0.0
@@ -26,7 +26,9 @@ class BrainController(BaseUnit):
         self.time_of_day = 0
         self._override = {}
 
-    def integrate_inputs(self, muscle_signals, gut_signals, wearable_signals, time_of_day):
+    def integrate_inputs(
+        self, muscle_signals, gut_signals, wearable_signals, time_of_day
+    ):
         """
         Combines physiological inputs and wearable data into control outputs.
 
@@ -54,14 +56,19 @@ class BrainController(BaseUnit):
         butyrate = gut_signals.get("butyrate_signal", 0)
 
         stress_input = fatigue + poor_sleep + (60 - hrv) / 100 - (butyrate * 0.1)
-        self.stress_level = max(0.0, self.stress_level * (1 - self.stress_decay_rate) + stress_input)
+        self.stress_level = max(
+            0.0, self.stress_level * (1 - self.stress_decay_rate) + stress_input
+        )
 
         # Cortisol production
         cortisol = min(1.0, self.stress_level * self.cortisol_threshold)
 
         # Circadian tone calculation
         circadian_peak = 23
-        circadian_tone = max(0.0, 1 - abs(time_of_day - circadian_peak) / 12) * self.circadian_baseline
+        circadian_tone = (
+            max(0.0, 1 - abs(time_of_day - circadian_peak) / 12)
+            * self.circadian_baseline
+        )
 
         # Hormone levels
         insulin = 0.6 if fatigue < 5 and poor_sleep < 0.3 else 0.4
@@ -77,7 +84,7 @@ class BrainController(BaseUnit):
             "cortisol": cortisol,
             "circadian_tone": circadian_tone,
             "digestive_signal": digestive_signal,
-            "muscle_signal": muscle_signal
+            "muscle_signal": muscle_signal,
         }
 
         # Apply rule-based prioritization
@@ -115,7 +122,9 @@ class BrainController(BaseUnit):
         )
 
         self.hunger_level = max(0.0, min(1.0, ghrelin * (1 - leptin)))
-        self.sleep_pressure = max(0.0, self.sleep_pressure * 0.9 + (1 - sleep_score) * 0.1)
+        self.sleep_pressure = max(
+            0.0, self.sleep_pressure * 0.9 + (1 - sleep_score) * 0.1
+        )
 
         cortisol = min(1.0, self.stress_level * self.cortisol_threshold)
         hormone_signals = {
@@ -184,13 +193,20 @@ class BrainController(BaseUnit):
         if time_of_day is not None:
             self.time_of_day = time_of_day
 
-        legacy = muscle_signals is not None or gut_signals is not None or time_of_day is not None
+        legacy = (
+            muscle_signals is not None
+            or gut_signals is not None
+            or time_of_day is not None
+        )
 
         outputs = {}
         if legacy:
             outputs.update(
                 self.integrate_inputs(
-                    muscle_signals or {}, gut_signals or {}, wearable_signals, self.time_of_day
+                    muscle_signals or {},
+                    gut_signals or {},
+                    wearable_signals,
+                    self.time_of_day,
                 )
             )
 

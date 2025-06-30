@@ -11,9 +11,10 @@ class HormoneRouter(BaseUnit):
                                     values are lists of suppressed hormones.
         """
         self.dominance_rules = dominance_rules or {
-           "cortisol": ["insulin", "digestive_signal", "melatonin"],
-           "glucagon": ["insulin"],
+            "cortisol": ["insulin", "digestive_signal", "melatonin"],
+            "glucagon": ["insulin"],
         }
+
     def reset(self):
         """No dynamic state to reset."""
         pass
@@ -43,8 +44,9 @@ class HormoneRouter(BaseUnit):
                     adjusted[suppressed] *= max(0.0, 1 - 0.5 * strength)
 
         return adjusted
-    
+
         # ------------------------------------------------------------------
+
     # New routing interface
     def route(self, hormone_candidates):
         """Resolve dominance for a set of hormone candidates.

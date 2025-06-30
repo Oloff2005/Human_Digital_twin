@@ -26,7 +26,7 @@ class LungReactor(BaseUnit):
         self.co2_pool = 0.0
         self._co2_in_rate = 0.0  # rate of CO₂ coming from tissues (mL/min)
 
-    # Optional override for real-time control
+        # Optional override for real-time control
         self.override_inputs = None
 
     def reset(self):

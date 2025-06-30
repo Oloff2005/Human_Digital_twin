@@ -30,6 +30,7 @@ class LiverMetabolicRouter(BaseUnit):
 
         # Optional override for real-time control
         self.override_inputs = None
+
     def reset(self):
         """Reset internal liver state."""
         self.liver_glucose = 0.0
@@ -50,7 +51,7 @@ class LiverMetabolicRouter(BaseUnit):
     def get_state(self):
         return {
             "liver_glucose": self.liver_glucose,
-            "liver_glycogen": self.current_glycogen
+            "liver_glycogen": self.current_glycogen,
         }
 
     def set_state(self, state_dict):
@@ -77,15 +78,16 @@ class LiverMetabolicRouter(BaseUnit):
         # Glycogen mobilization (proportional to glucagon)
         glycogen_release_rate = glycogen * glucagon_effect * 0.05  # slow breakdown
 
-        d_glucose_dt = self._incoming_glucose - glycogen_storage_rate + glycogen_release_rate
+        d_glucose_dt = (
+            self._incoming_glucose - glycogen_storage_rate + glycogen_release_rate
+        )
         d_glycogen_dt = glycogen_storage_rate - glycogen_release_rate
 
-        return {
-            "liver_glucose": d_glucose_dt,
-            "liver_glycogen": d_glycogen_dt
-        }
+        return {"liver_glucose": d_glucose_dt, "liver_glycogen": d_glycogen_dt}
 
-    def route(self, portal_input, microbiome_input=None, mobilized_reserves=None, signals=None):
+    def route(
+        self, portal_input, microbiome_input=None, mobilized_reserves=None, signals=None
+    ):
         """
         Static / discrete logic version of liver routing.
         """
@@ -116,24 +118,26 @@ class LiverMetabolicRouter(BaseUnit):
         return {
             "to_storage": {
                 "glycogen_stored": glycogen_stored,
-                "fat_stored": fat_stored
+                "fat_stored": fat_stored,
             },
             "to_muscle_aerobic": {
                 "glucose": glucose_remaining + glycogen_released,
-                "fat": fat_to_muscle + fat_released
+                "fat": fat_to_muscle + fat_released,
             },
             "to_muscle_anaerobic": {
                 "glucose": glucose_remaining * 0.3,
-                "ketones": ketones
+                "ketones": ketones,
             },
             "signals_to_brain": {
                 "scfas": microbiome_input,
                 "glucose_availability": glucose_remaining,
-                "glycogen_level": self.current_glycogen
-            }
+                "glycogen_level": self.current_glycogen,
+            },
         }
 
-    def step(self, portal_input, microbiome_input=None, mobilized_reserves=None, signals=None):
+    def step(
+        self, portal_input, microbiome_input=None, mobilized_reserves=None, signals=None
+    ):
         if self.override_inputs is not None:
             o = self.override_inputs
             portal_input = o.get("portal_input", portal_input)

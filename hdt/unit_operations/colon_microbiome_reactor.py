@@ -15,12 +15,11 @@ class ColonMicrobiomeReactor(BaseUnit):
             }
         """
         self.efficiency = config.get("fiber_fermentation_efficiency", 0.5)
-        self.scfa_profile = config.get("scfa_profile", {
-            "acetate": 0.6,
-            "propionate": 0.2,
-            "butyrate": 0.2
-        })
+        self.scfa_profile = config.get(
+            "scfa_profile", {"acetate": 0.6, "propionate": 0.2, "butyrate": 0.2}
+        )
         self.transit_time = config.get("transit_time", 480)  # 8 hours
+
     def reset(self):
         """No persistent state to reset."""
         pass
@@ -48,21 +47,19 @@ class ColonMicrobiomeReactor(BaseUnit):
         scfa_total = fiber_input * self.efficiency
         fecal_waste = fiber_input - scfa_total
 
-        scfa_output = {
-            k: scfa_total * v for k, v in self.scfa_profile.items()
-        }
+        scfa_output = {k: scfa_total * v for k, v in self.scfa_profile.items()}
 
         gut_signals = {
             "total_scfa": scfa_total,
             "butyrate_signal": scfa_output.get("butyrate", 0),
             "fermentation_ratio": self.efficiency,
-            "waste_transit_time": self.transit_time
+            "waste_transit_time": self.transit_time,
         }
 
         return {
             "scfa_output": scfa_output,
             "fecal_waste": fecal_waste,
-            "gut_brain_signals": gut_signals
+            "gut_brain_signals": gut_signals,
         }
 
     def step(self, fiber_input):

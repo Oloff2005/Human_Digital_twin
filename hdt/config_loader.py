@@ -6,7 +6,8 @@ try:
     import yaml  # type: ignore
 except ModuleNotFoundError:  # pragma: no cover - optional dependency may be absent
     yaml = None
-    
+
+
 def _parse_scalar(value: str) -> Any:
     """Parse a YAML scalar into the appropriate Python type."""
     lower = value.lower()
@@ -69,12 +70,14 @@ def _simple_yaml_load(path: str) -> Dict[str, Any]:
                     parent[key] = _parse_scalar(rest)
     return root
 
+
 def load_units_config(path: str) -> Dict[str, Any]:
     """Load unit configuration YAML."""
     if yaml is not None:
         with open(path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
     return _simple_yaml_load(path)
+
 
 def load_sim_params(path: str) -> Dict[str, Any]:
     """Load simulator parameter YAML."""

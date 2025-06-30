@@ -1,9 +1,12 @@
-import numpy as np
 from datetime import datetime
-from typing import Iterable, Dict
+from typing import Dict, Iterable
+
+import numpy as np
 
 
-def calibrate(inputs: Iterable[float], observed_outputs: Iterable[float], *, adjust: bool = False) -> Dict[str, float]:
+def calibrate(
+    inputs: Iterable[float], observed_outputs: Iterable[float], *, adjust: bool = False
+) -> Dict[str, float]:
     """Compare predicted outputs to observed values and compute error metrics.
 
     Parameters

@@ -1,4 +1,5 @@
 import math
+
 from .base_unit import BaseUnit
 
 
@@ -35,13 +36,17 @@ class SleepRegulationCenter(BaseUnit):
         """Wrapper using older interface for existing code paths."""
         wearable_signals = wearable_signals or {}
         circadian_phase = (current_hour % 24) / 24
-        sleep_quality = wearable_signals.get("sleep_quality", 1.0 - wearable_signals.get("sleep_debt", 0.0))
+        sleep_quality = wearable_signals.get(
+            "sleep_quality", 1.0 - wearable_signals.get("sleep_debt", 0.0)
+        )
         cortisol = wearable_signals.get("cortisol", 0.0)
 
         result = self.step(circadian_phase, sleep_quality, cortisol)
         # include legacy outputs
         result["sleep_drive"] = round(self.sleep_drive, 3)
-        result["sleep_signal"] = round(result["melatonin"] * 0.7 + result["recovery_score"] * 0.3, 3)
+        result["sleep_signal"] = round(
+            result["melatonin"] * 0.7 + result["recovery_score"] * 0.3, 3
+        )
         return result
 
     # ------------------------------------------------------------------
@@ -55,6 +60,7 @@ class SleepRegulationCenter(BaseUnit):
     def inject_override(self, inputs: dict):
         """Store override inputs for the next :meth:`step` call."""
         self.override_inputs = inputs
+
     # ------------------------------------------------------------------
     def _calculate_melatonin(self, circadian_phase):
         phase = circadian_phase % 1.0
@@ -88,7 +94,13 @@ class SleepRegulationCenter(BaseUnit):
         if self._override is not None:
             self.sleep_drive = self._override
         else:
-            deriv = self.derivatives(0, {"sleep_drive": self.sleep_drive}, circadian_phase, sleep_quality, cortisol)["sleep_drive"]
+            deriv = self.derivatives(
+                0,
+                {"sleep_drive": self.sleep_drive},
+                circadian_phase,
+                sleep_quality,
+                cortisol,
+            )["sleep_drive"]
             self.sleep_drive = min(1.0, max(0.0, self.sleep_drive + deriv))
 
         recovery_score = max(0.0, 1.0 - self.sleep_drive)

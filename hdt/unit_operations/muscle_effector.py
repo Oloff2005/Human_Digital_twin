@@ -16,7 +16,7 @@ class MuscleEffector(BaseUnit):
 
         self.activity_level = "rest"
         self.hormones = {"insulin": 0.6, "cortisol": 0.2}
-    
+
         # Optional override for simulator injections
         self.override_inputs = None
 
@@ -42,7 +42,7 @@ class MuscleEffector(BaseUnit):
         return {
             "muscle_glucose": self.glucose,
             "muscle_fat": self.fat,
-            "muscle_ketones": self.ketones
+            "muscle_ketones": self.ketones,
         }
 
     def set_state(self, state_dict):
@@ -58,11 +58,9 @@ class MuscleEffector(BaseUnit):
         """
         Calculates substrate usage rates based on current state and hormones.
         """
-        factor = {
-            "rest": 1.0,
-            "moderate": 2.5,
-            "high": self.exercise_factor
-        }.get(self.activity_level, 1.0)
+        factor = {"rest": 1.0, "moderate": 2.5, "high": self.exercise_factor}.get(
+            self.activity_level, 1.0
+        )
 
         insulin = self.hormones.get("insulin", 0.6)
         cortisol = self.hormones.get("cortisol", 0.2)
@@ -71,14 +69,17 @@ class MuscleEffector(BaseUnit):
         insulin_sensitivity = 1.0 + (insulin - 0.5) * 0.4
         cortisol_penalty = 1.0 + cortisol * 0.3
 
-        glucose_use = min(state["muscle_glucose"], atp_demand * 0.5 / 10 * insulin_sensitivity / cortisol_penalty)
+        glucose_use = min(
+            state["muscle_glucose"],
+            atp_demand * 0.5 / 10 * insulin_sensitivity / cortisol_penalty,
+        )
         fat_use = min(state["muscle_fat"], atp_demand * 0.3 / 9 / cortisol_penalty)
         ketone_use = min(state["muscle_ketones"], atp_demand * 0.2 / 8)
 
         return {
             "muscle_glucose": -glucose_use,
             "muscle_fat": -fat_use,
-            "muscle_ketones": -ketone_use
+            "muscle_ketones": -ketone_use,
         }
 
     def step(self, inputs, activity_level="rest", duration_min=60, hormones=None):
@@ -96,11 +97,9 @@ class MuscleEffector(BaseUnit):
         """
         Optional discrete simulation mode (unchanged).
         """
-        factor = {
-            "rest": 1.0,
-            "moderate": 2.5,
-            "high": self.exercise_factor
-        }.get(activity_level, 1.0)
+        factor = {"rest": 1.0, "moderate": 2.5, "high": self.exercise_factor}.get(
+            activity_level, 1.0
+        )
 
         insulin = hormones.get("insulin", 0.6) if hormones else 0.6
         cortisol = hormones.get("cortisol", 0.2) if hormones else 0.2
@@ -110,9 +109,16 @@ class MuscleEffector(BaseUnit):
         insulin_sensitivity = 1.0 + (insulin - 0.5) * 0.4
         cortisol_penalty = 1.0 + cortisol * 0.3
 
-        glucose_use = min(inputs.get("glucose", 0), atp_demand * 0.5 / 10 * insulin_sensitivity / cortisol_penalty)
+        glucose_use = min(
+            inputs.get("glucose", 0),
+            atp_demand * 0.5 / 10 * insulin_sensitivity / cortisol_penalty,
+        )
         fat_use = min(inputs.get("fat", 0), atp_demand * 0.3 / 9 / cortisol_penalty)
-        ketone_use = min(inputs.get("ketones", 0), atp_demand * 0.2 / 8) if "ketones" in inputs else 0
+        ketone_use = (
+            min(inputs.get("ketones", 0), atp_demand * 0.2 / 8)
+            if "ketones" in inputs
+            else 0
+        )
 
         co2_output = glucose_use * 0.8 + fat_use * 1.4 + ketone_use * 1.2
         h2o_output = glucose_use * 0.6 + fat_use * 1.1 + ketone_use * 1.0
@@ -124,14 +130,8 @@ class MuscleEffector(BaseUnit):
             "substrate_used": {
                 "glucose": glucose_use,
                 "fat": fat_use,
-                "ketones": ketone_use
+                "ketones": ketone_use,
             },
-            "exhaust": {
-                "co2": co2_output,
-                "h2o": h2o_output
-            },
-            "to_brain": {
-                "fatigue_signal": fatigue_signal,
-                "lactate": lactate
-            }
+            "exhaust": {"co2": co2_output, "h2o": h2o_output},
+            "to_brain": {"fatigue_signal": fatigue_signal, "lactate": lactate},
         }

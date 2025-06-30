@@ -9,6 +9,7 @@ PROJECT_ROOT = PACKAGE_ROOT.parent
 DEFAULT_CONFIG = PACKAGE_ROOT / "config" / "units_config_active.yaml"
 DEFAULT_INPUT = PROJECT_ROOT / "data" / "sample_inputs.json"
 
+
 def _run_command(args: argparse.Namespace) -> None:
     """Execute the simulation and handle output."""
     results = run_simulator(
@@ -55,6 +56,7 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
     args.func(args)
+
 
 if __name__ == "__main__":
     main()

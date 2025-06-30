@@ -8,7 +8,9 @@ from typing import Any, Dict, List, Union
 from hdt.config_loader import _parse_scalar
 
 
-def _simple_rules_load(path: str) -> Union[List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]]:
+def _simple_rules_load(
+    path: str,
+) -> Union[List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]]:
     """Very small loader supporting lists of rule dicts optionally grouped by version."""
 
     versions: Dict[str, List[Dict[str, Any]]] = {}
@@ -40,12 +42,16 @@ def _simple_rules_load(path: str) -> Union[List[Dict[str, Any]], Dict[str, List[
                 content = content[2:].strip()
                 if content and ":" in content:
                     key, val = content.split(":", 1)
-                    current_rule[key.strip()] = _parse_scalar(val.strip().strip('"').strip("'"))
+                    current_rule[key.strip()] = _parse_scalar(
+                        val.strip().strip('"').strip("'")
+                    )
                 continue
 
             if ":" in content:
                 key, val = content.split(":", 1)
-                current_rule[key.strip()] = _parse_scalar(val.strip().strip('"').strip("'"))
+                current_rule[key.strip()] = _parse_scalar(
+                    val.strip().strip('"').strip("'")
+                )
 
     if current_rule:
         current_target.append(current_rule)
@@ -65,7 +71,9 @@ class Recommender:
 
         if yaml is not None:
             with open(rules_path, "r", encoding="utf-8") as f:
-                data: Union[List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]] = yaml.safe_load(f) or {}
+                data: Union[List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]] = (
+                    yaml.safe_load(f) or {}
+                )
         else:
             data = _simple_rules_load(rules_path)
 
@@ -76,7 +84,9 @@ class Recommender:
                 if len(data) == 1:
                     self.rule_version, self.rules = next(iter(data.items()))
                 else:
-                    raise ValueError("rule_version must be specified when multiple versions are present")
+                    raise ValueError(
+                        "rule_version must be specified when multiple versions are present"
+                    )
             else:
                 if self.rule_version not in data:
                     raise ValueError(f"Unknown rule_version '{self.rule_version}'")
@@ -117,6 +127,7 @@ def threshold_rule_match(values: Dict[str, float], rules_path: str) -> List[str]
             rules = yaml.safe_load(f) or {}
     else:
         from hdt.config_loader import _simple_yaml_load
+
         rules = _simple_yaml_load(rules_path)
 
     suggestions: List[str] = []
