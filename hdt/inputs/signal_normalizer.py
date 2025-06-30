@@ -1,17 +1,20 @@
+from __future__ import annotations
+
 import math
+from typing import Any, Dict
 from utils.logging_utils import setup_logger
 
 logger = setup_logger(__name__)
 
 
 class SignalNormalizer:
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Optionally initialize normalization parameters or scaling coefficients.
         """
         pass
 
-    def normalize(self, parsed_signals: dict) -> dict:
+    def normalize(self, parsed_signals: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, float]]:
         """
         Normalize all signal values by unit and signal name.
 
@@ -26,7 +29,7 @@ class SignalNormalizer:
         Returns:
             dict: Normalized signals in the same structure
         """
-        normalized_signals = {}
+        normalized_signals: Dict[str, Dict[str, float]] = {}
 
         for unit, signals in parsed_signals.items():
             normalized_signals[unit] = {}

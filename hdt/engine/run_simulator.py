@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 import json
+from typing import Any, Dict, List
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config, load_sim_params
 from hdt.inputs.input_parser import InputParser
 from hdt.inputs.signal_normalizer import SignalNormalizer
 
-def run_simulator(config_path, input_path, steps=1, verbose=False):
+def run_simulator(
+    config_path: str,
+    input_path: str,
+    steps: int = 1,
+    verbose: bool = False,
+) -> List[Dict[str, Any]]:
     """
     Loads config and inputs, initializes Simulator, and runs simulation.
 
