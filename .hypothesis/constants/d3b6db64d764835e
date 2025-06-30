@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/liver_metabolic_router.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.05, 0.2, 0.3, 0.5, 0.7, 1.0, 100.0, 'amino_acids', 'fat', 'fat_stored', 'fatty_acids', 'glucagon', 'glucagon_sensitivity', 'gluconeogenesis_rate', 'glucose', 'glucose_availability', 'glycogen', 'glycogen_capacity', 'glycogen_level', 'glycogen_stored', 'insulin', 'insulin_sensitivity', 'ketones', 'liver_glucose', 'liver_glycogen', 'microbiome_input', 'mobilized_reserves', 'portal_input', 'scfas', 'signals', 'signals_to_brain', 'to_muscle_aerobic', 'to_muscle_anaerobic', 'to_storage']

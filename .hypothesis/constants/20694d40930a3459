@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/colon_microbiome_reactor.py
+# hypothesis_version: 6.135.17
+
+[0.2, 0.5, 0.6, 480, 'acetate', 'butyrate', 'butyrate_signal', 'fecal_waste', 'fermentation_ratio', 'gut_brain_signals', 'propionate', 'scfa_output', 'scfa_profile', 'total_scfa', 'transit_time', 'waste_transit_time']

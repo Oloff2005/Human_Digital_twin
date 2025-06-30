@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/skin_thermoregulator.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.2, 0.3, 1.0, 1.2, 1.8, 3.0, 10.0, 25.0, 37.2, 580.0, 'ambient_temp', 'conduction_coeff', 'core_temp', 'cortisol', 'duration_hr', 'heat_dissipated', 'heat_loss_per_l', 'heat_stress_score', 'skin_heat_loss_total', 'skin_sweat_total', 'sweat_loss', 'sweat_rate', 'sweat_rate_max', 'vasodilation']

@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/calibrate_model.py
+# hypothesis_version: 6.135.17
+
+[0.0, '--', 'Absolute Error', 'Error Over Time', 'Heart Rate', 'Liver', 'Liver Glycogen', 'Minute', '__main__', 'baseline', 'baseline_heart_rate', 'best', 'calibration_logs', 'data', 'errors', 'g', 'heart_rate', 'heart_rate_error', 'last_run.json', 'liver_glucose', 'liver_glycogen', 'liver_glycogen_error', 'mae', 'minute', 'orange', 'outputs', 'predicted_heart_rate', 'r', 'sample_inputs.json', 'utf-8', 'w']

@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/inputs/input_parser.py
+# hypothesis_version: 6.135.17
+
+['%s is NaN; skipping', 'r']

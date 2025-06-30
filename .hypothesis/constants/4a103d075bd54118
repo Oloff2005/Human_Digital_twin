@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/pancreatic_valve.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.1, 0.2, 0.3, 0.5, 1.0, 4.2, 5.2, 'glucagon', 'glucose', 'initial_glucagon', 'initial_insulin', 'insulin', 'pancreatic_glucagon', 'pancreatic_insulin', 'rate_of_change']

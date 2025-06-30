@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/streams/stream_map.py
+# hypothesis_version: 6.135.17
+
+['BIDIRECTIONAL_PAIRS', 'BidirectionalPair', 'Brain', 'BrainController', 'Connection', 'Gut', 'HeartCirculation', 'HormoneRouter', 'Liver', 'Muscle', 'STREAM_MAP', 'Storage']

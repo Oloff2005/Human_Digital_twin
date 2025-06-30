@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/simulator.py
+# hypothesis_version: 6.135.17
+
+[250, 320, 'BrainController', 'Simulator', 'brain', 'cardio', 'co2_exhale_rate', 'colon', 'gut', 'hormones', 'kidney', 'liver', 'lungs', 'muscle', 'oxygen_uptake_rate', 'pancreas', 'skin', 'sleep', 'storage']

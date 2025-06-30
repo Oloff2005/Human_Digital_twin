@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/utils/logging_utils.py
+# hypothesis_version: 6.135.17
+
+['%Y-%m-%d %H:%M:%S', 'hdt']

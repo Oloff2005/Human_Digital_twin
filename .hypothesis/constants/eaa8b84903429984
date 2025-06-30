@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/muscle_effector.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.1, 1.2, 1.4, 2.5, 4.0, 'activity_level', 'co2', 'cortisol', 'duration_min', 'exercise_factor', 'exhaust', 'fat', 'fat_utilization_rate', 'fatigue_signal', 'glucose', 'h2o', 'high', 'hormones', 'inputs', 'insulin', 'ketones', 'lactate', 'moderate', 'muscle_fat', 'muscle_glucose', 'muscle_ketones', 'rest', 'resting_atp_demand', 'substrate_used', 'to_brain']

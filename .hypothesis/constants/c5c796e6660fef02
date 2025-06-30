@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/heart_circulation.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.3, 0.7, 1.0, 5.0, 'amino_acids', 'cardiac_output', 'cv_amino_acids', 'cv_fatty_acids', 'cv_glucose', 'cv_water', 'delay_minutes', 'fatty_acids', 'glucose', 'to_liver', 'to_systemic', 'water']

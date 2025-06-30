@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+import types
 
 try:  # pragma: no cover - optional dependency
     import matplotlib.pyplot as plt_module
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
     plt_module = None
 
-from typing import Any, Dict, List
+plt_module: Optional[types.ModuleType]
 
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config, load_sim_params

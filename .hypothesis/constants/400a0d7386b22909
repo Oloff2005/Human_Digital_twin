@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/fat_storage_reservoir.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.5, 1.0, 300, 400, 8000, 12000, 'fat', 'fat_stored', 'glycogen', 'glycogen_stored', 'initial_fat', 'initial_glycogen', 'max_fat', 'max_glycogen', 'mobilization_rate', 'mobilized', 'remaining', 'storage_fat', 'storage_glycogen']

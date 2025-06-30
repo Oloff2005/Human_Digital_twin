@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/brain_controller.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.07, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.8, 0.9, 1.0, 1.2, 100, 10000, 'activity_intensity', 'butyrate_signal', 'circadian_baseline', 'circadian_tone', 'cortisol', 'cortisol_threshold', 'digestive_signal', 'fatigue_signal', 'ghrelin', 'glucagon', 'hormone_signals', 'hrv', 'hunger_level', 'insulin', 'leptin', 'melatonin', 'muscle_signal', 'sleep_pressure', 'sleep_quality', 'sleep_score', 'sleep_trigger', 'steps', 'stress_decay_rate', 'stress_level', 'stress_score', 'time_of_day']

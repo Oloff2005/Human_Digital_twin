@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/gut_reactor.py
+# hypothesis_version: 6.135.17
+
+[0.0, 0.3, 0.9, 1.0, 1.5, 100, 'absorbed', 'absorption_delay', 'amino_acids', 'carbs', 'circadian_tone', 'cortisol', 'digestion_efficiency', 'duration_min', 'fat', 'fatty_acids', 'fiber', 'glucose', 'gut_amino_acids', 'gut_fatty_acids', 'gut_glucose', 'gut_water', 'hormones', 'meal_input', 'protein', 'residue', 'water']

@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/unit_operations/lung_reactor.py
+# hypothesis_version: 6.135.17
+
+[0.0, 250, 320, 'co2_exhale_rate', 'co2_exhaled', 'co2_in', 'co2_remaining', 'duration_min', 'lung_co2', 'oxygen_to_blood', 'oxygen_uptake_rate']

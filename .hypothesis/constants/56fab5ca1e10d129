@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/engine/simulator.py
+# hypothesis_version: 6.135.17
+
+[0.5, 5.0, 22.0, 36.8, 'BrainController', 'Colon', 'Gut', 'HeartCirculation', 'HormoneRouter', 'Kidney', 'Liver', 'Lungs', 'Muscle', 'PancreaticValve', 'Skin', 'Storage', '__main__', 'absorbed', 'activity_level', 'ambient_temperature', 'amino_acids', 'brain', 'cardio', 'co2', 'colon', 'derivatives', 'exhaust', 'fat', 'fatty_acids', 'fiber', 'get_state', 'glucagon', 'glucose', 'gut', 'gut_signals', 'hormone_signals', 'hormones', 'hours_awake', 'kidney', 'liver', 'lungs', 'meal', 'minute', 'mobilized', 'muscle', 'muscle_signals', 'pancreas', 'recommendations', 'recommender', 'residue', 'rest', 'rule_based', 'rules.yaml', 'scfa_output', 'skin', 'sleep', 'state', 'storage', 'to_muscle_aerobic', 'to_storage', 'to_systemic', 'urea', 'version_A', 'water']

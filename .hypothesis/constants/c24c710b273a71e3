@@ -1,0 +1,4 @@
+# file: /Users/oloffosborne/Desktop/projects/Human_Digital_Twin/hdt/inputs/signal_normalizer.py
+# hypothesis_version: 6.135.17
+
+[100.0, 'heart_rate', 'oxygen_saturation', 'parasympathetic_tone', 'resting_heart_rate', 'sleep_score', 'stress_score', 'training_readiness']
