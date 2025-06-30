@@ -1,8 +1,10 @@
+from typing import Any, Dict
+
 from .base_unit import BaseUnit
 
 
 class ColonMicrobiomeReactor(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Simulates fiber fermentation, short-chain fatty acid (SCFA) production,
         and gut-brain signaling via microbiome.
@@ -20,17 +22,17 @@ class ColonMicrobiomeReactor(BaseUnit):
         )
         self.transit_time = config.get("transit_time", 480)  # 8 hours
 
-    def reset(self):
+    def reset(self) -> None:
         """No persistent state to reset."""
         pass
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, Any]:
         return {}
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, Any]) -> None:
         pass
 
-    def process_residue(self, fiber_input):
+    def process_residue(self, fiber_input: float) -> Dict[str, Any]:
         """
         Ferments unabsorbed fiber to produce SCFAs and waste.
 
@@ -62,7 +64,7 @@ class ColonMicrobiomeReactor(BaseUnit):
             "gut_brain_signals": gut_signals,
         }
 
-    def step(self, fiber_input):
+    def step(self, fiber_input: float) -> Dict[str, Any]:
         """
         Wrapper for process_residue to maintain consistent unit operation API.
         """

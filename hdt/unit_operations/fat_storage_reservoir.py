@@ -1,8 +1,10 @@
+from typing import Any, Dict, Optional
+
 from .base_unit import BaseUnit
 
 
 class FatStorageReservoir(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         ODE-compatible energy storage unit for glycogen and fat.
 
@@ -26,31 +28,35 @@ class FatStorageReservoir(BaseUnit):
         self._storage_inputs = {"glycogen_stored": 0.0, "fat_stored": 0.0}
         self._glucagon_signal = 0.5
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset stored nutrient amounts."""
         self.current_glycogen = 0.0
         self.current_fat = 0.0
         self._storage_inputs = {"glycogen_stored": 0.0, "fat_stored": 0.0}
         self._glucagon_signal = 0.5
 
-    def load_inputs(self, storage_inputs=None, glucagon_signal=0.5):
+    def load_inputs(
+        self,
+        storage_inputs: Optional[Dict[str, float]] = None,
+        glucagon_signal: float = 0.5,
+    ) -> None:
         self._storage_inputs = storage_inputs or {
             "glycogen_stored": 0.0,
             "fat_stored": 0.0,
         }
         self._glucagon_signal = glucagon_signal
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         return {
             "storage_glycogen": self.current_glycogen,
             "storage_fat": self.current_fat,
         }
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, float]) -> None:
         self.current_glycogen = state_dict["storage_glycogen"]
         self.current_fat = state_dict["storage_fat"]
 
-    def derivatives(self, t, state):
+    def derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
         """
         ODE model for dynamic storage and mobilization:
         d(storage) = +input - mobilization
@@ -69,7 +75,7 @@ class FatStorageReservoir(BaseUnit):
         return {"storage_glycogen": d_glycogen_dt, "storage_fat": d_fat_dt}
 
     # Discrete versions for compatibility/testing
-    def store(self, inputs):
+    def store(self, inputs: Dict[str, float]) -> Dict[str, float]:
         self.current_glycogen = min(
             self.max_glycogen, self.current_glycogen + inputs.get("glycogen_stored", 0)
         )
@@ -78,7 +84,9 @@ class FatStorageReservoir(BaseUnit):
         )
         return {"glycogen": self.current_glycogen, "fat": self.current_fat}
 
-    def mobilize(self, signal_strength=0.5, duration_hr=1.0):
+    def mobilize(
+        self, signal_strength: float = 0.5, duration_hr: float = 1.0
+    ) -> Dict[str, Dict[str, float]]:
         max_mobilize = self.mobilization_rate * duration_hr * signal_strength
         glycogen_out = min(max_mobilize * 0.5, self.current_glycogen)
         fat_out = min(max_mobilize * 0.5, self.current_fat)
@@ -89,7 +97,12 @@ class FatStorageReservoir(BaseUnit):
             "remaining": {"glycogen": self.current_glycogen, "fat": self.current_fat},
         }
 
-    def step(self, signal_strength=0.5, duration_hr=1.0, storage_inputs=None):
+    def step(
+        self,
+        signal_strength: float = 0.5,
+        duration_hr: float = 1.0,
+        storage_inputs: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Dict[str, float]]:
         if storage_inputs:
             self.store(storage_inputs)
         return self.mobilize(signal_strength, duration_hr)

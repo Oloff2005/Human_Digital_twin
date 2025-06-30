@@ -1,8 +1,10 @@
+from typing import Any, Dict, Optional
+
 from .base_unit import BaseUnit
 
 
 class LiverMetabolicRouter(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Liver router that handles nutrient processing, storage, and mobilization.
 
@@ -31,7 +33,7 @@ class LiverMetabolicRouter(BaseUnit):
         # Optional override for real-time control
         self.override_inputs = None
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset internal liver state."""
         self.liver_glucose = 0.0
         self.current_glycogen = 0.0
@@ -39,7 +41,9 @@ class LiverMetabolicRouter(BaseUnit):
         self._insulin = 0.5
         self._glucagon = 0.5
 
-    def load_portal_input(self, portal_input, signals=None):
+    def load_portal_input(
+        self, portal_input: Dict[str, float], signals: Optional[Dict[str, float]] = None
+    ) -> None:
         """
         Used for continuous simulation: sets incoming glucose & hormone levels.
         """
@@ -48,21 +52,21 @@ class LiverMetabolicRouter(BaseUnit):
         self._insulin = signals.get("insulin", 0.5)
         self._glucagon = signals.get("glucagon", 0.5)
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         return {
             "liver_glucose": self.liver_glucose,
             "liver_glycogen": self.current_glycogen,
         }
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, float]) -> None:
         self.liver_glucose = state_dict["liver_glucose"]
         self.current_glycogen = state_dict["liver_glycogen"]
 
-    def inject_override(self, inputs: dict):
+    def inject_override(self, inputs: Dict[str, Any]) -> None:
         """Store override inputs to be used on the next :meth:`step` call."""
         self.override_inputs = inputs
 
-    def derivatives(self, t, state):
+    def derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
         """
         ODE model: glucose from gut is stored as glycogen based on insulin levels.
         """
@@ -86,8 +90,12 @@ class LiverMetabolicRouter(BaseUnit):
         return {"liver_glucose": d_glucose_dt, "liver_glycogen": d_glycogen_dt}
 
     def route(
-        self, portal_input, microbiome_input=None, mobilized_reserves=None, signals=None
-    ):
+        self,
+        portal_input: Dict[str, float],
+        microbiome_input: Optional[Dict[str, float]] = None,
+        mobilized_reserves: Optional[Dict[str, float]] = None,
+        signals: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Any]:
         """
         Static / discrete logic version of liver routing.
         """
@@ -136,8 +144,12 @@ class LiverMetabolicRouter(BaseUnit):
         }
 
     def step(
-        self, portal_input, microbiome_input=None, mobilized_reserves=None, signals=None
-    ):
+        self,
+        portal_input: Dict[str, float],
+        microbiome_input: Optional[Dict[str, float]] = None,
+        mobilized_reserves: Optional[Dict[str, float]] = None,
+        signals: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Any]:
         if self.override_inputs is not None:
             o = self.override_inputs
             portal_input = o.get("portal_input", portal_input)

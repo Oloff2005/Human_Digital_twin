@@ -1,8 +1,10 @@
+from typing import Any, Dict
+
 from .base_unit import BaseUnit
 
 
 class KidneyReactor(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Simulates renal filtration and excretion of urea, water, and electrolytes.
 
@@ -15,17 +17,19 @@ class KidneyReactor(BaseUnit):
         self.urea_clearance = config.get("urea_clearance", 55)  # mL/min
         self.fluid_reabsorption = config.get("fluid_reabsorption", 0.96)
 
-    def reset(self):
+    def reset(self) -> None:
         """No internal state to reset for now."""
         pass
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, Any]:
         return {}
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, Any]) -> None:
         pass
 
-    def filter(self, blood_input, duration_min=60):
+    def filter(
+        self, blood_input: Dict[str, float], duration_min: int = 60
+    ) -> Dict[str, Dict[str, float]]:
         """
         Filters blood for urea and water removal.
 
@@ -66,7 +70,7 @@ class KidneyReactor(BaseUnit):
             "retained": {"urea": retained_urea, "water": retained_water},
         }
 
-    def step(self, blood_input, duration_min=60):
+    def step(self, blood_input: Dict[str, float], duration_min: int = 60) -> Dict[str, Dict[str, float]]:
         """
         Wrapper to standardize simulation interface.
 
