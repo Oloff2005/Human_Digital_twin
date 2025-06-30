@@ -1,3 +1,5 @@
+"""Parses raw wearable data into structured signals for the simulator."""
+
 from __future__ import annotations
 
 import json
@@ -17,7 +19,7 @@ class InputParser:
         Args:
             mapping_path (str): Path to wearable_mapping.json
         """
-        with open(mapping_path, "r") as file:
+        with open(mapping_path, "r", encoding="utf-8") as file:
             self.mapping: Dict[str, list[str]] = json.load(file)
 
     def parse(self, raw_data: Union[Dict[str, Any], str]) -> Dict[str, Dict[str, Any]]:
@@ -45,7 +47,7 @@ class InputParser:
 
         # Allow passing a file path for convenience
         if isinstance(raw_data, str):
-            with open(raw_data, "r") as f:
+            with open(raw_data, "r", encoding="utf-8") as f:
                 raw_data = json.load(f)
 
         raw_dict = cast(Dict[str, Any], raw_data)

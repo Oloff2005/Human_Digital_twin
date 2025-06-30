@@ -1,3 +1,5 @@
+"""Abstract interface for unit operations used in the simulation."""
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 

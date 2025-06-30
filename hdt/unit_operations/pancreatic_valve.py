@@ -1,3 +1,5 @@
+"""Simple endocrine pancreas model releasing insulin and glucagon."""
+
 from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit

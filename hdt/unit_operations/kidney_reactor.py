@@ -1,3 +1,5 @@
+"""Simulates renal filtration and urine production."""
+
 from typing import Any, Dict
 
 from .base_unit import BaseUnit
@@ -19,13 +21,12 @@ class KidneyReactor(BaseUnit):
 
     def reset(self) -> None:
         """No internal state to reset for now."""
-        pass
 
     def get_state(self) -> Dict[str, Any]:
         return {}
 
     def set_state(self, state_dict: Dict[str, Any]) -> None:
-        pass
+        """This unit maintains no persistent state."""
 
     def filter(
         self, blood_input: Dict[str, float], duration_min: int = 60

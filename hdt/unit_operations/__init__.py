@@ -1,3 +1,5 @@
+"""Collection of all unit operation classes used in the simulator."""
+
 from .base_unit import BaseUnit
 from .brain_controller import BrainController
 from .colon_microbiome_reactor import ColonMicrobiomeReactor

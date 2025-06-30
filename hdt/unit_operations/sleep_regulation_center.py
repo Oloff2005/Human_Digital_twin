@@ -1,3 +1,5 @@
+"""Circadian model producing sleep drive and melatonin release."""
+
 import math
 
 from typing import Any, Dict, Optional

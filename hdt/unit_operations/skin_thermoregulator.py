@@ -1,3 +1,5 @@
+"""Models sweat-driven heat dissipation and dry heat loss."""
+
 from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit

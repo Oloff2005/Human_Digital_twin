@@ -1,3 +1,5 @@
+"""Model of fiber fermentation and SCFA production in the colon."""
+
 from typing import Any, Dict
 
 from .base_unit import BaseUnit
@@ -24,13 +26,12 @@ class ColonMicrobiomeReactor(BaseUnit):
 
     def reset(self) -> None:
         """No persistent state to reset."""
-        pass
 
     def get_state(self) -> Dict[str, Any]:
         return {}
 
     def set_state(self, state_dict: Dict[str, Any]) -> None:
-        pass
+        """This unit has no mutable state."""
 
     def process_residue(self, fiber_input: float) -> Dict[str, Any]:
         """

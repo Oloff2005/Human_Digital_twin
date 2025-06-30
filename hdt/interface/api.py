@@ -1,3 +1,5 @@
+"""FastAPI application exposing HDT simulation endpoints."""
+
 from __future__ import annotations
 
 from pathlib import Path

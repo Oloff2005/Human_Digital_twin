@@ -1,3 +1,5 @@
+"""Pydantic models for validating wearable input payloads."""
+
 from typing import Any, Dict, Optional
 
 from pydantic import BaseModel

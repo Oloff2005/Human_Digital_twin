@@ -1,3 +1,5 @@
+"""Represents muscle tissue energy use and byproduct generation."""
+
 from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit

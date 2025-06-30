@@ -1,3 +1,5 @@
+"""Rule-based recommender supporting simple YAML rule sets."""
+
 try:
     import yaml  # type: ignore
     yaml_lib = yaml

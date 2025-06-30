@@ -1,3 +1,5 @@
+"""Lightweight wrapper exposing sensible defaults for the Simulator."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional

@@ -1,3 +1,5 @@
+"""Utility functions to load YAML configuration files for the simulator."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple, cast

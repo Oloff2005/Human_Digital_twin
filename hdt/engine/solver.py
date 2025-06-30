@@ -1,3 +1,5 @@
+"""Very small Euler-based ODE solver used for optional dynamics."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple

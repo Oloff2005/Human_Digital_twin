@@ -1,3 +1,5 @@
+"""High-level interface exposing rule-based or ML recommendations."""
+
 from __future__ import annotations
 
 import random
