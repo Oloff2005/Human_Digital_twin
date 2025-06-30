@@ -1,8 +1,10 @@
+from typing import Any, Dict, Optional
+
 from .base_unit import BaseUnit
 
 
 class BrainController(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """Central logic hub for hormonal and behavioral control."""
 
         self.cortisol_threshold = config.get("cortisol_threshold", 0.65)
@@ -18,7 +20,7 @@ class BrainController(BaseUnit):
         # Optional output overrides
         self._override = {}
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset internal controller state."""
         self.stress_level = 0.0
         self.hunger_level = 0.5
@@ -27,8 +29,12 @@ class BrainController(BaseUnit):
         self._override = {}
 
     def integrate_inputs(
-        self, muscle_signals, gut_signals, wearable_signals, time_of_day
-    ):
+        self,
+        muscle_signals: Dict[str, Any],
+        gut_signals: Dict[str, Any],
+        wearable_signals: Dict[str, Any],
+        time_of_day: int,
+    ) -> Dict[str, float]:
         """
         Combines physiological inputs and wearable data into control outputs.
 
@@ -92,7 +98,7 @@ class BrainController(BaseUnit):
 
         return signals
 
-    def apply_priority_rules(self, signals):
+    def apply_priority_rules(self, signals: Dict[str, float]) -> Dict[str, float]:
         """
         Applies hardcoded priority rules for control logic.
         """
@@ -107,7 +113,11 @@ class BrainController(BaseUnit):
 
     # ------------------------------------------------------------------
     # New control routing logic
-    def route_control_signals(self, wearable_signals, metabolic_state):
+    def route_control_signals(
+        self,
+        wearable_signals: Dict[str, Any],
+        metabolic_state: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Process wearable and metabolic inputs into control outputs."""
         stress_score = wearable_signals.get("stress_score", 0.0)
         sleep_score = wearable_signals.get("sleep_score", 0.8)
@@ -148,11 +158,11 @@ class BrainController(BaseUnit):
 
         return outputs
 
-    def inject_override(self, override_dict):
+    def inject_override(self, override_dict: Optional[Dict[str, Any]]) -> None:
         """Override output signals in ``route_control_signals``."""
         self._override = override_dict or {}
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, Any]:
         return {
             "stress_level": self.stress_level,
             "hunger_level": self.hunger_level,
@@ -160,13 +170,13 @@ class BrainController(BaseUnit):
             "time_of_day": self.time_of_day,
         }
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, Any]) -> None:
         self.stress_level = state_dict.get("stress_level", self.stress_level)
         self.hunger_level = state_dict.get("hunger_level", self.hunger_level)
         self.sleep_pressure = state_dict.get("sleep_pressure", self.sleep_pressure)
         self.time_of_day = state_dict.get("time_of_day", self.time_of_day)
 
-    def set_manual_override(self, state_name, value):
+    def set_manual_override(self, state_name: str, value: Any) -> None:
         """
         Manually override internal states like stress_level or time_of_day.
         """
@@ -175,12 +185,12 @@ class BrainController(BaseUnit):
 
     def step(
         self,
-        muscle_signals=None,
-        gut_signals=None,
-        wearable_signals=None,
-        time_of_day=None,
-        metabolic_state=None,
-    ):
+        muscle_signals: Optional[Dict[str, Any]] = None,
+        gut_signals: Optional[Dict[str, Any]] = None,
+        wearable_signals: Optional[Dict[str, Any]] = None,
+        time_of_day: Optional[int] = None,
+        metabolic_state: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Execute one control step.
 
         This keeps backward compatibility with the original signature while also

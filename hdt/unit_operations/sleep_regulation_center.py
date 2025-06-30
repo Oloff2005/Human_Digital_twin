@@ -1,12 +1,14 @@
 import math
 
+from typing import Any, Dict, Optional
+
 from .base_unit import BaseUnit
 
 
 class SleepRegulationCenter(BaseUnit):
     """Simulate circadian driven sleep pressure and recovery."""
 
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         self.drive_gain = config.get("drive_gain", 0.05)
         self.recovery_gain = config.get("recovery_gain", 0.1)
         self.melatonin_amplitude = config.get("melatonin_amplitude", 1.0)
@@ -20,7 +22,7 @@ class SleepRegulationCenter(BaseUnit):
         # Optional override for real-time control
         self.override_inputs = None
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset sleep drive and overrides."""
         self.sleep_drive = 0.5
         self.hours_awake = 0
@@ -28,11 +30,13 @@ class SleepRegulationCenter(BaseUnit):
 
     # ------------------------------------------------------------------
     # Legacy helpers ----------------------------------------------------
-    def update_state(self, hours_since_last_sleep):
+    def update_state(self, hours_since_last_sleep: float) -> None:
         """Maintain backwards compatibility with older API."""
         self.hours_awake = hours_since_last_sleep
 
-    def compute_sleep_signals(self, current_hour, wearable_signals=None):
+    def compute_sleep_signals(
+        self, current_hour: int, wearable_signals: Optional[Dict[str, float]] = None
+    ) -> Dict[str, float]:
         """Wrapper using older interface for existing code paths."""
         wearable_signals = wearable_signals or {}
         circadian_phase = (current_hour % 24) / 24
@@ -50,24 +54,31 @@ class SleepRegulationCenter(BaseUnit):
         return result
 
     # ------------------------------------------------------------------
-    def set_sleep_drive_override(self, value):
+    def set_sleep_drive_override(self, value: float) -> None:
         """Allow real-time override of the sleep drive state."""
         self._override = value
 
-    def clear_override(self):
+    def clear_override(self) -> None:
         self._override = None
 
-    def inject_override(self, inputs: dict):
+    def inject_override(self, inputs: Dict[str, Any]) -> None:
         """Store override inputs for the next :meth:`step` call."""
         self.override_inputs = inputs
 
     # ------------------------------------------------------------------
-    def _calculate_melatonin(self, circadian_phase):
+    def _calculate_melatonin(self, circadian_phase: float) -> float:
         phase = circadian_phase % 1.0
         mel = 0.5 * (1 + math.cos(2 * math.pi * (phase - 0.5)))
         return min(1.0, max(0.0, mel * self.melatonin_amplitude))
 
-    def derivatives(self, t, state, circadian_phase, sleep_quality, cortisol):
+    def derivatives(
+        self,
+        t: float,
+        state: Dict[str, float],
+        circadian_phase: float,
+        sleep_quality: float,
+        cortisol: float,
+    ) -> Dict[str, float]:
         melatonin = self._calculate_melatonin(circadian_phase)
         increase = self.drive_gain * (1 - melatonin)
         decrease = self.recovery_gain * sleep_quality * melatonin
@@ -75,13 +86,18 @@ class SleepRegulationCenter(BaseUnit):
         d_drive = increase - decrease + cortisol_effect
         return {"sleep_drive": d_drive}
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         return {"sleep_drive": self.sleep_drive}
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, float]) -> None:
         self.sleep_drive = state_dict.get("sleep_drive", self.sleep_drive)
 
-    def step(self, circadian_phase, sleep_quality=1.0, cortisol=0.0):
+    def step(
+        self,
+        circadian_phase: float,
+        sleep_quality: float = 1.0,
+        cortisol: float = 0.0,
+    ) -> Dict[str, float]:
         if self.override_inputs is not None:
             o = self.override_inputs
             circadian_phase = o.get("circadian_phase", circadian_phase)

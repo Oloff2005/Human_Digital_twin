@@ -1,8 +1,10 @@
+from typing import Any, Dict, Optional
+
 from .base_unit import BaseUnit
 
 
 class GutReactor(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Simulates gastrointestinal processing of ingested food using ODEs or static digestion.
 
@@ -26,14 +28,18 @@ class GutReactor(BaseUnit):
         # Optional override for real-time control via the simulator
         self.override_inputs = None
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset internal nutrient pools."""
         self.glucose = 0.0
         self.fatty_acids = 0.0
         self.amino_acids = 0.0
         self.water = 0.0
 
-    def load_meal(self, meal_input, hormones=None):
+    def load_meal(
+        self,
+        meal_input: Dict[str, float],
+        hormones: Optional[Dict[str, float]] = None,
+    ) -> None:
         """
         Loads a meal into the gut for continuous simulation.
         """
@@ -48,7 +54,7 @@ class GutReactor(BaseUnit):
         self.water = meal_input.get("water", 0.0) * digestion_eff
         # Fiber remains residue — not modeled here
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         return {
             "gut_glucose": self.glucose,
             "gut_fatty_acids": self.fatty_acids,
@@ -56,17 +62,17 @@ class GutReactor(BaseUnit):
             "gut_water": self.water,
         }
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, float]) -> None:
         self.glucose = state_dict["gut_glucose"]
         self.fatty_acids = state_dict["gut_fatty_acids"]
         self.amino_acids = state_dict["gut_amino_acids"]
         self.water = state_dict["gut_water"]
 
-    def inject_override(self, inputs: dict):
+    def inject_override(self, inputs: Dict[str, Any]) -> None:
         """Store override inputs to be used on the next :meth:`step` call."""
         self.override_inputs = inputs
 
-    def derivatives(self, t, state):
+    def derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
         """
         Simulates continuous absorption using first-order kinetics.
         dX/dt = -k * X
@@ -80,7 +86,12 @@ class GutReactor(BaseUnit):
             "gut_water": -k * state["gut_water"],
         }
 
-    def digest(self, meal_input, duration_min=60, hormones=None):
+    def digest(
+        self,
+        meal_input: Dict[str, float],
+        duration_min: int = 60,
+        hormones: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Dict[str, float]]:
         """
         Static digestion for backward compatibility or simple use.
         """
@@ -121,7 +132,12 @@ class GutReactor(BaseUnit):
 
         return {"absorbed": absorbed, "residue": residue}
 
-    def step(self, meal_input, duration_min=60, hormones=None):
+    def step(
+        self,
+        meal_input: Dict[str, float],
+        duration_min: int = 60,
+        hormones: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Dict[str, float]]:
         if self.override_inputs is not None:
             o = self.override_inputs
             meal_input = o.get("meal_input", meal_input)

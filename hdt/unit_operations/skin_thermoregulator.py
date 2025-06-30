@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from .base_unit import BaseUnit
 
 
@@ -10,7 +12,7 @@ class SkinThermoregulator(BaseUnit):
     existing simulator and tests.
     """
 
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """Initialize the regulator with optional tuning parameters."""
 
         # Maximum achievable sweat rate in L/hr
@@ -39,7 +41,7 @@ class SkinThermoregulator(BaseUnit):
         # Optional override for real-time control
         self.override_inputs = None
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset cumulative sweat and heat loss."""
         self.total_sweat = 0.0
         self.total_heat_loss = 0.0
@@ -49,7 +51,13 @@ class SkinThermoregulator(BaseUnit):
 
     # ------------------------------------------------------------------
     # Discrete helper used by the simulator
-    def regulate(self, core_temp, ambient_temp, duration_hr=1.0, hormones=None):
+    def regulate(
+        self,
+        core_temp: float,
+        ambient_temp: float,
+        duration_hr: float = 1.0,
+        hormones: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, Any]:
         """Backward compatible wrapper around :meth:`step`."""
 
         cortisol = hormones.get("cortisol", 0.0) if hormones else 0.0
@@ -66,7 +74,13 @@ class SkinThermoregulator(BaseUnit):
         }
 
     # ------------------------------------------------------------------
-    def step(self, core_temp, ambient_temp, cortisol=0.0, duration_hr=1.0):
+    def step(
+        self,
+        core_temp: float,
+        ambient_temp: float,
+        cortisol: float = 0.0,
+        duration_hr: float = 1.0,
+    ) -> Dict[str, float]:
         """Execute a discrete thermoregulation step.
 
         Parameters
@@ -119,21 +133,21 @@ class SkinThermoregulator(BaseUnit):
 
     # ------------------------------------------------------------------
     # ODE compatibility methods
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         return {
             "skin_sweat_total": self.total_sweat,
             "skin_heat_loss_total": self.total_heat_loss,
         }
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, float]) -> None:
         self.total_sweat = state_dict["skin_sweat_total"]
         self.total_heat_loss = state_dict["skin_heat_loss_total"]
 
-    def inject_override(self, inputs: dict):
+    def inject_override(self, inputs: Dict[str, Any]) -> None:
         """Store override inputs to be used on the next :meth:`step` call."""
         self.override_inputs = inputs
 
-    def derivatives(self, t, state):
+    def derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
         """Derivatives for ODE integration of cumulative values."""
 
         core_temp = self._core_temp

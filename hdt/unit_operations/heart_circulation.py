@@ -1,8 +1,10 @@
+from typing import Any, Dict
+
 from .base_unit import BaseUnit
 
 
 class HeartCirculation(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """Cardiovascular transport of nutrients and hormones.
 
         Parameters
@@ -32,7 +34,7 @@ class HeartCirculation(BaseUnit):
             "water": 0.0,
         }
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset nutrient pools and absorbed inputs."""
         self.cv_glucose = 0.0
         self.cv_fatty_acids = 0.0
@@ -45,7 +47,7 @@ class HeartCirculation(BaseUnit):
             "water": 0.0,
         }
 
-    def distribute(self, absorbed_nutrients):
+    def distribute(self, absorbed_nutrients: Dict[str, float]) -> Dict[str, Any]:
         """Route nutrients from gut to liver and systemic tissues.
 
         Parameters
@@ -75,14 +77,14 @@ class HeartCirculation(BaseUnit):
             "delay_minutes": self.transport_delay,
         }
 
-    def step(self, absorbed_nutrients):
+    def step(self, absorbed_nutrients: Dict[str, float]) -> Dict[str, Any]:
         """Wrapper for :meth:`distribute` for unit operation API."""
         return self.distribute(absorbed_nutrients)
 
     # ------------------------------------------------------------------
     # ODE integration helpers
     # ------------------------------------------------------------------
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         """Return the current amounts of nutrients in transit."""
         return {
             "cv_glucose": self.cv_glucose,
@@ -91,14 +93,14 @@ class HeartCirculation(BaseUnit):
             "cv_water": self.cv_water,
         }
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, float]) -> None:
         """Set the internal state from ``state_dict``."""
         self.cv_glucose = state_dict["cv_glucose"]
         self.cv_fatty_acids = state_dict["cv_fatty_acids"]
         self.cv_amino_acids = state_dict["cv_amino_acids"]
         self.cv_water = state_dict["cv_water"]
 
-    def derivatives(self, t, state):
+    def derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
         """First-order delay dynamics for nutrient transport."""
         return {
             "cv_glucose": self._absorbed.get("glucose", 0.0)

@@ -1,8 +1,10 @@
+from typing import Any, Dict, List, Optional
+
 from .base_unit import BaseUnit
 
 
 class HormoneRouter(BaseUnit):
-    def __init__(self, dominance_rules=None):
+    def __init__(self, dominance_rules: Optional[Dict[str, List[str]]] = None) -> None:
         """
         Modulates hormone signals by enforcing dominance rules.
 
@@ -15,17 +17,17 @@ class HormoneRouter(BaseUnit):
             "glucagon": ["insulin"],
         }
 
-    def reset(self):
+    def reset(self) -> None:
         """No dynamic state to reset."""
         pass
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, Any]:
         return {}
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, Any]) -> None:
         pass
 
-    def resolve(self, hormone_outputs):
+    def resolve(self, hormone_outputs: Dict[str, float]) -> Dict[str, float]:
         """
         Adjust hormone signals based on dominance suppression logic.
 
@@ -48,7 +50,7 @@ class HormoneRouter(BaseUnit):
         # ------------------------------------------------------------------
 
     # New routing interface
-    def route(self, hormone_candidates):
+    def route(self, hormone_candidates: Dict[str, float]) -> Dict[str, float]:
         """Resolve dominance for a set of hormone candidates.
 
         Parameters
@@ -65,7 +67,7 @@ class HormoneRouter(BaseUnit):
         adjusted = self.resolve(hormone_candidates)
         return {k: round(v, 3) for k, v in adjusted.items()}
 
-    def step(self, hormone_outputs):
+    def step(self, hormone_outputs: Dict[str, float]) -> Dict[str, float]:
         """
         Step method to fit simulation loop.
 

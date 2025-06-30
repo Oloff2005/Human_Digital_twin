@@ -1,8 +1,10 @@
+from typing import Any, Dict
+
 from .base_unit import BaseUnit
 
 
 class PancreaticValve(BaseUnit):
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Simulates insulin/glucagon release in response to blood glucose.
 
@@ -26,14 +28,16 @@ class PancreaticValve(BaseUnit):
         # Optional override for real-time control
         self.override_inputs = None
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset hormone levels and cached inputs."""
         self.insulin_level = 0.5
         self.glucagon_level = 0.5
         self._blood_glucose = self.insulin_threshold
         self._rate_of_change = 0.0
 
-    def regulate(self, blood_glucose_mmol_per_L, rate_of_change=0.0):
+    def regulate(
+        self, blood_glucose_mmol_per_L: float, rate_of_change: float = 0.0
+    ) -> Dict[str, float]:
         """
         Releases insulin or glucagon based on glucose level and change.
 
@@ -65,12 +69,12 @@ class PancreaticValve(BaseUnit):
 
         return {"insulin": round(insulin, 3), "glucagon": round(glucagon, 3)}
 
-    def load_inputs(self, blood_glucose, rate_of_change=0.0):
+    def load_inputs(self, blood_glucose: float, rate_of_change: float = 0.0) -> None:
         """Store inputs for use in derivatives."""
         self._blood_glucose = blood_glucose
         self._rate_of_change = rate_of_change
 
-    def step(self, glucose, rate_of_change=0.0):
+    def step(self, glucose: float, rate_of_change: float = 0.0) -> Dict[str, float]:
         """
         Executes one simulation step for hormone regulation.
 
@@ -95,21 +99,21 @@ class PancreaticValve(BaseUnit):
 
     # ------------------------------------------------------------------
     # ODE-compatible methods
-    def get_state(self):
+    def get_state(self) -> Dict[str, float]:
         return {
             "pancreatic_insulin": self.insulin_level,
             "pancreatic_glucagon": self.glucagon_level,
         }
 
-    def set_state(self, state_dict):
+    def set_state(self, state_dict: Dict[str, float]) -> None:
         self.insulin_level = state_dict["pancreatic_insulin"]
         self.glucagon_level = state_dict["pancreatic_glucagon"]
 
-    def inject_override(self, inputs: dict):
+    def inject_override(self, inputs: Dict[str, Any]) -> None:
         """Store override inputs to be used on the next :meth:`step` call."""
         self.override_inputs = inputs
 
-    def derivatives(self, t, state):
+    def derivatives(self, t: float, state: Dict[str, float]) -> Dict[str, float]:
         """Simple first-order approach toward regulated hormone levels."""
         target = self.regulate(self._blood_glucose, self._rate_of_change)
         d_insulin = target["insulin"] - state["pancreatic_insulin"]
