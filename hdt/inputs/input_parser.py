@@ -1,21 +1,24 @@
+from __future__ import annotations
+
 import json
 import math
+from typing import Any, Dict, Union
 from utils.logging_utils import setup_logger
 
 logger = setup_logger(__name__)
 
 class InputParser:
-    def __init__(self, mapping_path: str):
+    def __init__(self, mapping_path: str) -> None:
         """
         Initialize the InputParser with a wearable-to-model mapping.
 
         Args:
             mapping_path (str): Path to wearable_mapping.json
         """
-        with open(mapping_path, 'r') as file:
-            self.mapping = json.load(file)
+        with open(mapping_path, "r") as file:
+            self.mapping: Dict[str, list[str]] = json.load(file)
 
-    def parse(self, raw_data) -> dict:
+    def parse(self, raw_data: Union[Dict[str, Any], str]) -> Dict[str, Dict[str, Any]]:
         """
        Map incoming raw JSON data to internal physiological modules. ``raw_data``
        may be a dictionary or a path to a JSON file. Any ``None`` values are
@@ -40,10 +43,10 @@ class InputParser:
 
         # Allow passing a file path for convenience
         if isinstance(raw_data, str):
-            with open(raw_data, 'r') as f:
+            with open(raw_data, "r") as f:
                 raw_data = json.load(f)
 
-        parsed_signals = {}
+        parsed_signals: Dict[str, Dict[str, Any]] = {}
 
         for signal, targets in self.mapping.items():
              value = raw_data.get(signal)

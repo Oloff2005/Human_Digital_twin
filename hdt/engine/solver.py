@@ -1,4 +1,6 @@
-from typing import List, Dict, Tuple
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Tuple
 
 # Avoid heavy third party dependencies like numpy/scipy so that the test suite
 # can run in a minimal environment.  The solver below implements a very simple
@@ -12,7 +14,7 @@ class ODESolver:
     a forward Euler integration across the provided ``t_eval`` grid.
     """
 
-    def __init__(self, units: List):
+    def __init__(self, units: List[Any]):
         """
         Initialize with a list of unit operations.
         Each unit must have:
@@ -20,12 +22,12 @@ class ODESolver:
         - set_state(state_dict)
         - derivatives(t, state_vector): returns [dy/dt]
         """
-        self.units = units
-        self.state_vars = []
-        self.var_to_unit = {}
+        self.units: List[Any] = units
+        self.state_vars: List[str] = []
+        self.var_to_unit: Dict[str, Any] = {}
         self._build_state_map()
 
-    def _build_state_map(self):
+    def _build_state_map(self) -> None:
         """Maps each state variable to its owning unit."""
         for unit in self.units:
             state = unit.get_state()
@@ -42,7 +44,12 @@ class ODESolver:
             derivatives.update(derivs)
         return derivatives
 
-    def solve(self, t_span: Tuple[float, float], y0: Dict[str, float], t_eval=None):
+    def solve(
+        self,
+        t_span: Tuple[float, float],
+        y0: Dict[str, float],
+        t_eval: Optional[List[float]] = None,
+    ) -> List[Dict[str, Any]]:
       """Integrate the system using a simple Euler method."""
 
       if t_eval is None:
