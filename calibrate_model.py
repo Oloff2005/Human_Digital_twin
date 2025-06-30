@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 
 try:  # pragma: no cover - optional dependency
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt_module
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
-    plt = None
+    plt_module = None
 
 from typing import Any, Dict, List
 
@@ -26,7 +26,7 @@ def create_plots(
         output_path (Path): location to save the image.
     """
 
-    if plt is None:
+    if plt_module is None:
         # Matplotlib not available; skip plotting
         return
     
@@ -34,7 +34,7 @@ def create_plots(
     glycogen_pred = [snap.get("Liver", {}).get("liver_glycogen") for snap in history]
     heart_rate_pred = [heart_rate_input for _ in history]
 
-    fig, axes = plt.subplots(2, 1, figsize=(8, 8))
+    fig, axes = plt_module.subplots(2, 1, figsize=(8, 8))
 
     # Predicted vs baseline values
     axes[0].plot(minutes, glycogen_pred, label="predicted_liver_glycogen")
@@ -69,7 +69,7 @@ def create_plots(
 
     fig.tight_layout()
     fig.savefig(output_path)
-    plt.close(fig)
+    plt_module.close(fig)
 
 def run_calibration(save_logs: bool = True) -> Dict[str, Any]:
     """Run a single calibration step and optionally save logs."""

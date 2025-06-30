@@ -5,8 +5,9 @@ import os
 
 try:
     import yaml  # type: ignore
+    yaml_lib = yaml
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
-    yaml = None
+    yaml_lib = None
 
 
 def load_baseline_state(path: str = "data/baseline_states.yaml") -> Dict[str, Any]:
@@ -25,9 +26,9 @@ def load_baseline_state(path: str = "data/baseline_states.yaml") -> Dict[str, An
     if not os.path.exists(path):
         return {}
 
-    if yaml is not None:
+    if yaml_lib is not None:
         with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+            return yaml_lib.safe_load(f) or {}
 
     from hdt.config_loader import _simple_yaml_load
 

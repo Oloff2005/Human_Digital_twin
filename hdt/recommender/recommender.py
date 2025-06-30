@@ -1,7 +1,8 @@
 try:
     import yaml  # type: ignore
+    yaml_lib = yaml
 except ModuleNotFoundError:  # pragma: no cover
-    yaml = None
+    yaml_lib = None
 
 from typing import Any, Dict, List, Union
 
@@ -69,10 +70,10 @@ class Recommender:
     def __init__(self, rules_path: str, rule_version: str | None = None) -> None:
         self.rule_version = rule_version
 
-        if yaml is not None:
+        if yaml_lib is not None:
             with open(rules_path, "r", encoding="utf-8") as f:
                 data: Union[List[Dict[str, Any]], Dict[str, List[Dict[str, Any]]]] = (
-                    yaml.safe_load(f) or {}
+                    yaml_lib.safe_load(f) or {}
                 )
         else:
             data = _simple_rules_load(rules_path)
@@ -122,9 +123,9 @@ class Recommender:
 
 def threshold_rule_match(values: Dict[str, float], rules_path: str) -> List[str]:
     """Return recommendations based on numeric threshold rules."""
-    if yaml is not None:
+    if yaml_lib is not None:
         with open(rules_path, "r", encoding="utf-8") as f:
-            rules = yaml.safe_load(f) or {}
+            rules = yaml_lib.safe_load(f) or {}
     else:
         from hdt.config_loader import _simple_yaml_load
 
