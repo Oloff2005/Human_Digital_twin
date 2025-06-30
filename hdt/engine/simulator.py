@@ -10,6 +10,19 @@ from hdt.inputs.signal_normalizer import SignalNormalizer
 from hdt.recommender.rule_engine import RuleEngine
 from hdt.streams.stream import BidirectionalStreamManager, Stream
 from hdt.streams.stream_map import BIDIRECTIONAL_PAIRS, STREAM_MAP, BidirectionalPair
+from hdt.unit_operations.brain_controller import BrainController
+from hdt.unit_operations.colon_microbiome_reactor import ColonMicrobiomeReactor
+from hdt.unit_operations.fat_storage_reservoir import FatStorageReservoir
+from hdt.unit_operations.gut_reactor import GutReactor
+from hdt.unit_operations.heart_circulation import HeartCirculation
+from hdt.unit_operations.hormone_router import HormoneRouter
+from hdt.unit_operations.kidney_reactor import KidneyReactor
+from hdt.unit_operations.liver_metabolic_router import LiverMetabolicRouter
+from hdt.unit_operations.lung_reactor import LungReactor
+from hdt.unit_operations.muscle_effector import MuscleEffector
+from hdt.unit_operations.pancreatic_valve import PancreaticValve
+from hdt.unit_operations.skin_thermoregulator import SkinThermoregulator
+from hdt.unit_operations.sleep_regulation_center import SleepRegulationCenter
 
 
 class Simulator:
@@ -38,19 +51,6 @@ class Simulator:
         # ------------------------------------------------------------------
         # Initialize unit operations
         # ------------------------------------------------------------------
-        from hdt.unit_operations.brain_controller import BrainController
-        from hdt.unit_operations.colon_microbiome_reactor import ColonMicrobiomeReactor
-        from hdt.unit_operations.fat_storage_reservoir import FatStorageReservoir
-        from hdt.unit_operations.gut_reactor import GutReactor
-        from hdt.unit_operations.heart_circulation import HeartCirculation
-        from hdt.unit_operations.hormone_router import HormoneRouter
-        from hdt.unit_operations.kidney_reactor import KidneyReactor
-        from hdt.unit_operations.liver_metabolic_router import LiverMetabolicRouter
-        from hdt.unit_operations.lung_reactor import LungReactor
-        from hdt.unit_operations.muscle_effector import MuscleEffector
-        from hdt.unit_operations.pancreatic_valve import PancreaticValve
-        from hdt.unit_operations.skin_thermoregulator import SkinThermoregulator
-        from hdt.unit_operations.sleep_regulation_center import SleepRegulationCenter
 
         self.units: Dict[str, Any] = {
             "BrainController": BrainController(config.get("brain", {})),

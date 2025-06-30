@@ -5,10 +5,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 import streamlit as st
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from calibrate_model import run_calibration
 from hdt.config_loader import load_units_config
