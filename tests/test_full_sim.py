@@ -51,7 +51,11 @@ muscle_inputs.update(routed["to_muscle_anaerobic"])
 muscle.load_inputs(muscle_inputs, activity_level="moderate", hormones=hormones)
 
 # Store energy in Storage
-storage.step(signal_strength=hormones["glucagon"], duration_hr=duration_hr, storage_inputs=routed["to_storage"])
+storage.step({
+    "signal_strength": hormones["glucagon"],
+    "duration_hr": duration_hr,
+    "storage_inputs": routed["to_storage"],
+})
 
 # Build initial state
 initial_state = {

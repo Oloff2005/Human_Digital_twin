@@ -39,7 +39,7 @@ class SkinThermoregulator(BaseUnit):
         self._cortisol = 0.0
 
         # Optional override for real-time control
-        self.override_inputs = None
+        self.override_inputs: Optional[Dict[str, Any]] = None
 
     def reset(self) -> None:
         """Reset cumulative sweat and heat loss."""
@@ -61,7 +61,14 @@ class SkinThermoregulator(BaseUnit):
         """Backward compatible wrapper around :meth:`step`."""
 
         cortisol = hormones.get("cortisol", 0.0) if hormones else 0.0
-        out = self.step(core_temp, ambient_temp, cortisol, duration_hr)
+        out = self.step(
+            {
+                "core_temp": core_temp,
+                "ambient_temp": ambient_temp,
+                "cortisol": cortisol,
+                "duration_hr": duration_hr,
+            }
+        )
 
         temp_diff = max(0, core_temp - self.vasodilation_temp_threshold)
         vasodilation = core_temp >= self.vasodilation_temp_threshold
@@ -74,13 +81,11 @@ class SkinThermoregulator(BaseUnit):
         }
 
     # ------------------------------------------------------------------
-    def step(
-        self,
-        core_temp: float,
-        ambient_temp: float,
-        cortisol: float = 0.0,
-        duration_hr: float = 1.0,
-    ) -> Dict[str, float]:
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, float]:
+        core_temp = float(inputs.get("core_temp", self.vasodilation_temp_threshold))
+        ambient_temp = float(inputs.get("ambient_temp", 25.0))
+        cortisol = float(inputs.get("cortisol", 0.0))
+        duration_hr = float(inputs.get("duration_hr", 1.0))
         """Execute a discrete thermoregulation step.
 
         Parameters

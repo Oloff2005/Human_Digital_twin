@@ -1,11 +1,12 @@
 import json
 import os
 from datetime import datetime
+from typing import Any, Dict
 
 HISTORY_PATH = "data/health_history.json"
 
 
-def log_health_snapshot(raw_data: dict, sim_result: dict) -> None:
+def log_health_snapshot(raw_data: Dict[str, Any], sim_result: Dict[str, Any]) -> None:
     """
     Appends a new health + simulation record to the history log.
     """

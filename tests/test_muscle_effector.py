@@ -13,13 +13,13 @@ class TestMuscleEffector(unittest.TestCase):
 
     def test_step_outputs(self):
         inputs = {"glucose": 40, "fat": 20, "ketones": 5}
-        result = self.muscle.step(inputs, activity_level="moderate")
+        result = self.muscle.step({"inputs": inputs, "activity_level": "moderate"})
         self.assertIn("substrate_used", result)
         self.assertIn("exhaust", result)
 
     def test_conservation_of_mass(self):
         inputs = {"glucose": 30, "fat": 10, "ketones": 2}
-        result = self.muscle.step(inputs)
+        result = self.muscle.step({"inputs": inputs})
         used = result["substrate_used"]
         self.assertLessEqual(used["glucose"], inputs["glucose"]) 
         self.assertLessEqual(used["fat"], inputs["fat"])

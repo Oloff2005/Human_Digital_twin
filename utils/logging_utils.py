@@ -1,7 +1,7 @@
 import logging
 import sys
 
-def setup_logger(name="hdt", level=logging.INFO):
+def setup_logger(name: str = "hdt", level: int = logging.INFO) -> logging.Logger:
     """
     Sets up a logger with console output and consistent formatting.
 

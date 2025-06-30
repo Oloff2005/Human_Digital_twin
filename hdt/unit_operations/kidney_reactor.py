@@ -70,11 +70,10 @@ class KidneyReactor(BaseUnit):
             "retained": {"urea": retained_urea, "water": retained_water},
         }
 
-    def step(self, blood_input: Dict[str, float], duration_min: int = 60) -> Dict[str, Dict[str, float]]:
-        """
-        Wrapper to standardize simulation interface.
-
-        Returns:
-            dict: Output from renal processing
-        """
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
+        """Wrapper for :meth:`filter` using dict input."""
+        blood_input = inputs.get("blood_input", {})
+        if not isinstance(blood_input, dict):
+            blood_input = {}
+        duration_min = int(inputs.get("duration_min", 60))
         return self.filter(blood_input, duration_min)

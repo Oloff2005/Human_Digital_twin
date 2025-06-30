@@ -67,14 +67,7 @@ class HormoneRouter(BaseUnit):
         adjusted = self.resolve(hormone_candidates)
         return {k: round(v, 3) for k, v in adjusted.items()}
 
-    def step(self, hormone_outputs: Dict[str, float]) -> Dict[str, float]:
-        """
-        Step method to fit simulation loop.
-
-        Args:
-            hormone_outputs (dict): raw hormones from BrainController
-
-        Returns:
-            dict: adjusted hormones after resolving dominance
-        """
-        return self.route(hormone_outputs)
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, float]:
+        """Step method using dict input."""
+        outputs = inputs if isinstance(inputs, dict) else {}
+        return self.route({k: float(v) for k, v in outputs.items()})

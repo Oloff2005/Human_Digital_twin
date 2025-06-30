@@ -97,12 +97,10 @@ class FatStorageReservoir(BaseUnit):
             "remaining": {"glycogen": self.current_glycogen, "fat": self.current_fat},
         }
 
-    def step(
-        self,
-        signal_strength: float = 0.5,
-        duration_hr: float = 1.0,
-        storage_inputs: Optional[Dict[str, float]] = None,
-    ) -> Dict[str, Dict[str, float]]:
-        if storage_inputs:
-            self.store(storage_inputs)
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
+        signal_strength = float(inputs.get("signal_strength", 0.5))
+        duration_hr = float(inputs.get("duration_hr", 1.0))
+        storage_inputs = inputs.get("storage_inputs")
+        if isinstance(storage_inputs, dict):
+            self.store({k: float(v) for k, v in storage_inputs.items()})
         return self.mobilize(signal_strength, duration_hr)

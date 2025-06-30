@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit
 
@@ -26,7 +26,7 @@ class PancreaticValve(BaseUnit):
         self._rate_of_change = 0.0
 
         # Optional override for real-time control
-        self.override_inputs = None
+        self.override_inputs: Optional[Dict[str, Any]] = None
 
     def reset(self) -> None:
         """Reset hormone levels and cached inputs."""
@@ -74,7 +74,9 @@ class PancreaticValve(BaseUnit):
         self._blood_glucose = blood_glucose
         self._rate_of_change = rate_of_change
 
-    def step(self, glucose: float, rate_of_change: float = 0.0) -> Dict[str, float]:
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, float]:
+        glucose = float(inputs.get("glucose", 0.0))
+        rate_of_change = float(inputs.get("rate_of_change", 0.0))
         """
         Executes one simulation step for hormone regulation.
 

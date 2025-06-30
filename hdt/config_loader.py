@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple, cast
 
 try:
     import yaml  # type: ignore
@@ -24,9 +24,9 @@ def _parse_scalar(value: str) -> Any:
 
 def _simple_yaml_load(path: str) -> Dict[str, Any]:
     """Very small YAML loader supporting the subset used in tests."""
-    root: dict = {}
-    stack = [(0, root)]  # (indent, container)
-    key_stack = []  # track keys for dict containers
+    root: Dict[str, Any] = {}
+    stack: List[Tuple[int, Any]] = [(0, root)]  # (indent, container)
+    key_stack: List[str] = []  # track keys for dict containers
 
     with open(path, "r", encoding="utf-8") as f:
         for raw in f:
@@ -50,7 +50,7 @@ def _simple_yaml_load(path: str) -> Dict[str, Any]:
                 elif parent == {} and key_stack:
                     key = key_stack[-1]
                     grandparent = stack[-2][1]
-                    lst: list = []
+                    lst: List[Any] = []
                     grandparent[key] = lst
                     stack[-1] = (indent, lst)
                     parent = lst
@@ -62,7 +62,7 @@ def _simple_yaml_load(path: str) -> Dict[str, Any]:
                 key = key.strip()
                 rest = rest.strip()
                 if rest == "":
-                    new_container: dict = {}
+                    new_container: Dict[str, Any] = {}
                     parent[key] = new_container
                     stack.append((indent + 2, new_container))
                     key_stack.append(key)
@@ -75,7 +75,7 @@ def load_units_config(path: str) -> Dict[str, Any]:
     """Load unit configuration YAML."""
     if yaml is not None:
         with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+            return cast(Dict[str, Any], yaml.safe_load(f))
     return _simple_yaml_load(path)
 
 
@@ -83,5 +83,5 @@ def load_sim_params(path: str) -> Dict[str, Any]:
     """Load simulator parameter YAML."""
     if yaml is not None:
         with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
+            return cast(Dict[str, Any], yaml.safe_load(f))
     return _simple_yaml_load(path)

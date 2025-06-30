@@ -64,8 +64,7 @@ class ColonMicrobiomeReactor(BaseUnit):
             "gut_brain_signals": gut_signals,
         }
 
-    def step(self, fiber_input: float) -> Dict[str, Any]:
-        """
-        Wrapper for process_residue to maintain consistent unit operation API.
-        """
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Wrapper for :meth:`process_residue` using dict input."""
+        fiber_input = float(inputs.get("fiber_input", 0.0))
         return self.process_residue(fiber_input)

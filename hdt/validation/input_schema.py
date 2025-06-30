@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel
 
@@ -28,6 +28,6 @@ class InputValidator:
     model = AppleHealthInput
 
     @classmethod
-    def validate(cls, data: dict) -> dict:
+    def validate(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         """Return a dictionary of validated values or raise ``ValidationError``."""
-        return cls.model(**data).model_dump(exclude_none=True)
+        return cls.model(**data).dict(exclude_none=True)
