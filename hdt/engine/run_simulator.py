@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 from typing import Any, Dict, List
+
+from hdt.config_loader import load_sim_params, load_units_config
 from hdt.engine.simulator import Simulator
-from hdt.config_loader import load_units_config, load_sim_params
 from hdt.inputs.input_parser import InputParser
 from hdt.inputs.signal_normalizer import SignalNormalizer
+
 
 def run_simulator(
     config_path: str,
@@ -28,7 +30,6 @@ def run_simulator(
     # Load configurations
     config = load_units_config(config_path)
     load_sim_params("hdt/config/sim_params.yaml")  # Ensure file is valid
-
 
     # Parse and normalize input
     parser = InputParser("hdt/config/wearable_mapping.json")

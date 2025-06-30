@@ -30,10 +30,13 @@ class Stream:
     def __repr__(self) -> str:
         return f"<Stream {self.source}→{self.target} delay={self.delay}>"
 
+
 class BidirectionalStreamManager:
     """A reversible stream between two unit operations."""
 
-    def __init__(self, unit_a: str, unit_b: str, delay_ab: int = 0, delay_ba: int = 0) -> None:
+    def __init__(
+        self, unit_a: str, unit_b: str, delay_ab: int = 0, delay_ba: int = 0
+    ) -> None:
         """Creates two directional streams: A→B and B→A."""
         self.ab = Stream(unit_a, unit_b, delay=delay_ab)
         self.ba = Stream(unit_b, unit_a, delay=delay_ba)
@@ -45,7 +48,9 @@ class BidirectionalStreamManager:
         elif source == self.ba.source:
             self.ba.push(payload, timestamp)
         else:
-            raise ValueError(f"Source '{source}' is not part of this bidirectional stream.")
+            raise ValueError(
+                f"Source '{source}' is not part of this bidirectional stream."
+            )
 
     def pull(self, target: str, timestamp: int) -> List[Any]:
         """Pull payloads targeted at the given unit."""
@@ -54,7 +59,9 @@ class BidirectionalStreamManager:
         elif target == self.ba.target:
             return self.ba.pull(timestamp)
         else:
-            raise ValueError(f"Target '{target}' is not part of this bidirectional stream.")
+            raise ValueError(
+                f"Target '{target}' is not part of this bidirectional stream."
+            )
 
     def step(self, unit_name: str, timestamp: int) -> List[Any]:
         """Simulation-friendly step function for one unit."""

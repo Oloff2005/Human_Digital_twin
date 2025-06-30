@@ -22,10 +22,10 @@ class PancreaticValve(BaseUnit):
         # Inputs used by derivatives()
         self._blood_glucose = self.insulin_threshold
         self._rate_of_change = 0.0
-    
+
         # Optional override for real-time control
         self.override_inputs = None
-        
+
     def reset(self):
         """Reset hormone levels and cached inputs."""
         self.insulin_level = 0.5
@@ -51,18 +51,19 @@ class PancreaticValve(BaseUnit):
         glucagon = 0.0
 
         if blood_glucose_mmol_per_L >= self.insulin_threshold:
-            insulin = min(1.0, 0.5 + (blood_glucose_mmol_per_L - self.insulin_threshold) * 0.2)
+            insulin = min(
+                1.0, 0.5 + (blood_glucose_mmol_per_L - self.insulin_threshold) * 0.2
+            )
         elif blood_glucose_mmol_per_L <= self.glucagon_threshold:
-            glucagon = min(1.0, 0.5 + (self.glucagon_threshold - blood_glucose_mmol_per_L) * 0.3)
+            glucagon = min(
+                1.0, 0.5 + (self.glucagon_threshold - blood_glucose_mmol_per_L) * 0.3
+            )
 
         # Slight adjustment based on trend
         insulin = max(0.0, min(1.0, insulin + rate_of_change * 0.1))
         glucagon = max(0.0, min(1.0, glucagon - rate_of_change * 0.1))
 
-        return {
-            "insulin": round(insulin, 3),
-            "glucagon": round(glucagon, 3)
-        }
+        return {"insulin": round(insulin, 3), "glucagon": round(glucagon, 3)}
 
     def load_inputs(self, blood_glucose, rate_of_change=0.0):
         """Store inputs for use in derivatives."""
@@ -103,7 +104,7 @@ class PancreaticValve(BaseUnit):
     def set_state(self, state_dict):
         self.insulin_level = state_dict["pancreatic_insulin"]
         self.glucagon_level = state_dict["pancreatic_glucagon"]
-        
+
     def inject_override(self, inputs: dict):
         """Store override inputs to be used on the next :meth:`step` call."""
         self.override_inputs = inputs

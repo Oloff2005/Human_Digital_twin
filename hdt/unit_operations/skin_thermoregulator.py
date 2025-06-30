@@ -35,7 +35,7 @@ class SkinThermoregulator(BaseUnit):
         self._core_temp = self.vasodilation_temp_threshold
         self._ambient_temp = 25.0
         self._cortisol = 0.0
-    
+
         # Optional override for real-time control
         self.override_inputs = None
 
@@ -128,7 +128,7 @@ class SkinThermoregulator(BaseUnit):
     def set_state(self, state_dict):
         self.total_sweat = state_dict["skin_sweat_total"]
         self.total_heat_loss = state_dict["skin_heat_loss_total"]
-        
+
     def inject_override(self, inputs: dict):
         """Store override inputs to be used on the next :meth:`step` call."""
         self.override_inputs = inputs

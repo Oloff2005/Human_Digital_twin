@@ -31,14 +31,20 @@ class HeartCirculation(BaseUnit):
             "amino_acids": 0.0,
             "water": 0.0,
         }
+
     def reset(self):
         """Reset nutrient pools and absorbed inputs."""
         self.cv_glucose = 0.0
         self.cv_fatty_acids = 0.0
         self.cv_amino_acids = 0.0
         self.cv_water = 0.0
-        self._absorbed = {"glucose": 0.0, "fatty_acids": 0.0, "amino_acids": 0.0, "water": 0.0}
-    
+        self._absorbed = {
+            "glucose": 0.0,
+            "fatty_acids": 0.0,
+            "amino_acids": 0.0,
+            "water": 0.0,
+        }
+
     def distribute(self, absorbed_nutrients):
         """Route nutrients from gut to liver and systemic tissues.
 
@@ -95,8 +101,12 @@ class HeartCirculation(BaseUnit):
     def derivatives(self, t, state):
         """First-order delay dynamics for nutrient transport."""
         return {
-            "cv_glucose": self._absorbed.get("glucose", 0.0) - state["cv_glucose"] / self.transport_delay,
-            "cv_fatty_acids": self._absorbed.get("fatty_acids", 0.0) - state["cv_fatty_acids"] / self.transport_delay,
-            "cv_amino_acids": self._absorbed.get("amino_acids", 0.0) - state["cv_amino_acids"] / self.transport_delay,
-            "cv_water": self._absorbed.get("water", 0.0) - state["cv_water"] / self.transport_delay,
+            "cv_glucose": self._absorbed.get("glucose", 0.0)
+            - state["cv_glucose"] / self.transport_delay,
+            "cv_fatty_acids": self._absorbed.get("fatty_acids", 0.0)
+            - state["cv_fatty_acids"] / self.transport_delay,
+            "cv_amino_acids": self._absorbed.get("amino_acids", 0.0)
+            - state["cv_amino_acids"] / self.transport_delay,
+            "cv_water": self._absorbed.get("water", 0.0)
+            - state["cv_water"] / self.transport_delay,
         }

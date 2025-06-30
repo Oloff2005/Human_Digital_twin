@@ -1,5 +1,7 @@
 from typing import Optional
+
 from pydantic import BaseModel
+
 
 class AppleHealthInput(BaseModel):
     heart_rate: Optional[float] = None
@@ -18,6 +20,7 @@ class AppleHealthInput(BaseModel):
     skin_temperature: Optional[float] = None
     training_readiness: Optional[int] = None
     recovery_time_estimate: Optional[int] = None
+
 
 class InputValidator:
     """Validates and converts raw wearable JSON input using the ``AppleHealthInput`` schema."""

@@ -7,12 +7,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from hdt.config_loader import load_sim_params, load_units_config
 from hdt.engine.simulator import Simulator
-from hdt.config_loader import load_units_config, load_sim_params
 from hdt.inputs.input_parser import InputParser
 from hdt.inputs.signal_normalizer import SignalNormalizer
 from hdt.validation.input_schema import AppleHealthInput
-
 
 BASE_DIR = Path(__file__).resolve().parent
 PACKAGE_ROOT = BASE_DIR / "hdt"

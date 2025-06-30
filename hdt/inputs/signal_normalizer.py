@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from typing import Any, Dict
+
 from utils.logging_utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -14,7 +15,9 @@ class SignalNormalizer:
         """
         pass
 
-    def normalize(self, parsed_signals: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, float]]:
+    def normalize(
+        self, parsed_signals: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, Dict[str, float]]:
         """
         Normalize all signal values by unit and signal name.
 

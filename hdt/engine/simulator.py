@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
-
 from pathlib import Path
-
-from hdt.recommender.rule_engine import RuleEngine
+from typing import Any, Dict, List, Optional
 
 from hdt.core.time_manager import TimeManager
 from hdt.engine.solver import ODESolver
 from hdt.inputs.input_parser import InputParser
 from hdt.inputs.signal_normalizer import SignalNormalizer
-from hdt.streams.stream import Stream, BidirectionalStreamManager
-from hdt.streams.stream_map import STREAM_MAP, BIDIRECTIONAL_PAIRS, BidirectionalPair
+from hdt.recommender.rule_engine import RuleEngine
+from hdt.streams.stream import BidirectionalStreamManager, Stream
+from hdt.streams.stream_map import BIDIRECTIONAL_PAIRS, STREAM_MAP, BidirectionalPair
 
 
 class Simulator:
@@ -28,7 +26,9 @@ class Simulator:
         self.use_ode = use_ode
         self.time = TimeManager()
         self.history: List[Dict[str, Any]] = []
-        rules_path = Path(__file__).resolve().parent.parent / "recommender" / "rules.yaml"
+        rules_path = (
+            Path(__file__).resolve().parent.parent / "recommender" / "rules.yaml"
+        )
         self.rule_engine = RuleEngine(
             mode="rule_based",
             rules_path=str(rules_path),
@@ -39,15 +39,15 @@ class Simulator:
         # Initialize unit operations
         # ------------------------------------------------------------------
         from hdt.unit_operations.brain_controller import BrainController
-        from hdt.unit_operations.gut_reactor import GutReactor
         from hdt.unit_operations.colon_microbiome_reactor import ColonMicrobiomeReactor
-        from hdt.unit_operations.liver_metabolic_router import LiverMetabolicRouter
-        from hdt.unit_operations.heart_circulation import HeartCirculation
-        from hdt.unit_operations.kidney_reactor import KidneyReactor
-        from hdt.unit_operations.muscle_effector import MuscleEffector
-        from hdt.unit_operations.hormone_router import HormoneRouter
-        from hdt.unit_operations.lung_reactor import LungReactor
         from hdt.unit_operations.fat_storage_reservoir import FatStorageReservoir
+        from hdt.unit_operations.gut_reactor import GutReactor
+        from hdt.unit_operations.heart_circulation import HeartCirculation
+        from hdt.unit_operations.hormone_router import HormoneRouter
+        from hdt.unit_operations.kidney_reactor import KidneyReactor
+        from hdt.unit_operations.liver_metabolic_router import LiverMetabolicRouter
+        from hdt.unit_operations.lung_reactor import LungReactor
+        from hdt.unit_operations.muscle_effector import MuscleEffector
         from hdt.unit_operations.pancreatic_valve import PancreaticValve
         from hdt.unit_operations.skin_thermoregulator import SkinThermoregulator
         from hdt.unit_operations.sleep_regulation_center import SleepRegulationCenter
@@ -83,7 +83,7 @@ class Simulator:
             for conn in STREAM_MAP
         }
 
-         # Bidirectional stream managers
+        # Bidirectional stream managers
         self.bidir_streams: Dict[frozenset, BidirectionalStreamManager] = {}
         for pair in BIDIRECTIONAL_PAIRS:
             manager = BidirectionalStreamManager(
@@ -139,20 +139,30 @@ class Simulator:
                 wearable_signals=self.signals.get("BrainController", {}),
                 time_of_day=self.time.hour,
             )
-            self.streams[("BrainController", "HormoneRouter")].push(brain_out, self.time.minute)
+            self.streams[("BrainController", "HormoneRouter")].push(
+                brain_out, self.time.minute
+            )
 
             hr_inputs = {}
-            for payload in self.streams[("BrainController", "HormoneRouter")].step(self.time.minute):
+            for payload in self.streams[("BrainController", "HormoneRouter")].step(
+                self.time.minute
+            ):
                 if isinstance(payload, dict):
                     hr_inputs.update(payload)
             # HormoneRouter expects plain hormone signals only
             nested = hr_inputs.pop("hormone_signals", {})
-            hr_inputs.update({k: v for k, v in nested.items() if isinstance(v, (int, float))})
-            hr_inputs = {k: v for k, v in hr_inputs.items() if isinstance(v, (int, float))}
+            hr_inputs.update(
+                {k: v for k, v in nested.items() if isinstance(v, (int, float))}
+            )
+            hr_inputs = {
+                k: v for k, v in hr_inputs.items() if isinstance(v, (int, float))
+            }
             hormone_out = self.units["HormoneRouter"].step(hr_inputs)
             for conn in STREAM_MAP:
                 if conn.origin == "HormoneRouter":
-                    self.streams[(conn.origin, conn.destination)].push(hormone_out, self.time.minute)
+                    self.streams[(conn.origin, conn.destination)].push(
+                        hormone_out, self.time.minute
+                    )
 
             gut_inputs = external_inputs.get("meal", {})
             gut_out = self.units["Gut"].step(
@@ -165,7 +175,7 @@ class Simulator:
             portal_inputs = {}
             for payload in self.streams[("Gut", "Liver")].step(self.time.minute):
                 if isinstance(payload, dict):
-                   portal_inputs.update(payload)
+                    portal_inputs.update(payload)
 
             mobilized = self.units["Storage"].mobilize(
                 signal_strength=hormone_out.get("glucagon", 0.5), duration_hr=1
@@ -188,7 +198,9 @@ class Simulator:
             )
 
             cv_inputs = {}
-            for payload in self.streams[("Liver", "HeartCirculation")].step(self.time.minute):
+            for payload in self.streams[("Liver", "HeartCirculation")].step(
+                self.time.minute
+            ):
                 if isinstance(payload, dict):
                     cv_inputs.update(payload)
             cardio_out = self.units["HeartCirculation"].step(cv_inputs)
@@ -220,7 +232,9 @@ class Simulator:
             )
 
             sleep_unit = self.units["SleepRegulationCenter"]
-            sleep_unit.update_state(hours_since_last_sleep=external_inputs.get("hours_awake", 12))
+            sleep_unit.update_state(
+                hours_since_last_sleep=external_inputs.get("hours_awake", 12)
+            )
             sleep_out = sleep_unit.compute_sleep_signals(
                 current_hour=self.time.hour,
                 wearable_signals=self.signals.get("SleepRegulationCenter", {}),
@@ -239,11 +253,14 @@ class Simulator:
         self.time.tick(60)
 
     # ------------------------------------------------------------------
-    def run(self, steps: int, external_inputs: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def run(
+        self, steps: int, external_inputs: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
         for _ in range(steps):
             self.step(external_inputs)
         return self.history
-    
+
+
 if __name__ == "__main__":
     print("🚀 Human Digital Twin Simulation Started in Docker!")
     # Call your main simulation logic here

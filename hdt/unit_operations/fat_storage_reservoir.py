@@ -34,13 +34,16 @@ class FatStorageReservoir(BaseUnit):
         self._glucagon_signal = 0.5
 
     def load_inputs(self, storage_inputs=None, glucagon_signal=0.5):
-        self._storage_inputs = storage_inputs or {"glycogen_stored": 0.0, "fat_stored": 0.0}
+        self._storage_inputs = storage_inputs or {
+            "glycogen_stored": 0.0,
+            "fat_stored": 0.0,
+        }
         self._glucagon_signal = glucagon_signal
 
     def get_state(self):
         return {
             "storage_glycogen": self.current_glycogen,
-            "storage_fat": self.current_fat
+            "storage_fat": self.current_fat,
         }
 
     def set_state(self, state_dict):
@@ -63,19 +66,17 @@ class FatStorageReservoir(BaseUnit):
         d_glycogen_dt = glycogen_in - glycogen_out
         d_fat_dt = fat_in - fat_out
 
-        return {
-            "storage_glycogen": d_glycogen_dt,
-            "storage_fat": d_fat_dt
-        }
+        return {"storage_glycogen": d_glycogen_dt, "storage_fat": d_fat_dt}
 
     # Discrete versions for compatibility/testing
     def store(self, inputs):
-        self.current_glycogen = min(self.max_glycogen, self.current_glycogen + inputs.get("glycogen_stored", 0))
-        self.current_fat = min(self.max_fat, self.current_fat + inputs.get("fat_stored", 0))
-        return {
-            "glycogen": self.current_glycogen,
-            "fat": self.current_fat
-        }
+        self.current_glycogen = min(
+            self.max_glycogen, self.current_glycogen + inputs.get("glycogen_stored", 0)
+        )
+        self.current_fat = min(
+            self.max_fat, self.current_fat + inputs.get("fat_stored", 0)
+        )
+        return {"glycogen": self.current_glycogen, "fat": self.current_fat}
 
     def mobilize(self, signal_strength=0.5, duration_hr=1.0):
         max_mobilize = self.mobilization_rate * duration_hr * signal_strength
@@ -84,14 +85,8 @@ class FatStorageReservoir(BaseUnit):
         self.current_glycogen -= glycogen_out
         self.current_fat -= fat_out
         return {
-            "mobilized": {
-                "glycogen": glycogen_out,
-                "fat": fat_out
-            },
-            "remaining": {
-                "glycogen": self.current_glycogen,
-                "fat": self.current_fat
-            }
+            "mobilized": {"glycogen": glycogen_out, "fat": fat_out},
+            "remaining": {"glycogen": self.current_glycogen, "fat": self.current_fat},
         }
 
     def step(self, signal_strength=0.5, duration_hr=1.0, storage_inputs=None):

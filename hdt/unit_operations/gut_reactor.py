@@ -22,7 +22,7 @@ class GutReactor(BaseUnit):
         self.fatty_acids = 0.0
         self.amino_acids = 0.0
         self.water = 0.0
-        
+
         # Optional override for real-time control via the simulator
         self.override_inputs = None
 
@@ -53,7 +53,7 @@ class GutReactor(BaseUnit):
             "gut_glucose": self.glucose,
             "gut_fatty_acids": self.fatty_acids,
             "gut_amino_acids": self.amino_acids,
-            "gut_water": self.water
+            "gut_water": self.water,
         }
 
     def set_state(self, state_dict):
@@ -77,7 +77,7 @@ class GutReactor(BaseUnit):
             "gut_glucose": -k * state["gut_glucose"],
             "gut_fatty_acids": -k * state["gut_fatty_acids"],
             "gut_amino_acids": -k * state["gut_amino_acids"],
-            "gut_water": -k * state["gut_water"]
+            "gut_water": -k * state["gut_water"],
         }
 
     def digest(self, meal_input, duration_min=60, hormones=None):
@@ -91,7 +91,12 @@ class GutReactor(BaseUnit):
         digestion_eff = self.digestion_efficiency * efficiency_modifier
         max_digestion = self.gastric_emptying_rate * duration_min
 
-        absorbed = {"glucose": 0.0, "fatty_acids": 0.0, "amino_acids": 0.0, "water": 0.0}
+        absorbed = {
+            "glucose": 0.0,
+            "fatty_acids": 0.0,
+            "amino_acids": 0.0,
+            "water": 0.0,
+        }
         residue = {}
 
         for nutrient, total in meal_input.items():

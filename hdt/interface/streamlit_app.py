@@ -1,20 +1,20 @@
+import json
+import os
+import sys
 from pathlib import Path
 
-import json
-import streamlit as st
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
+import streamlit as st
 
-import sys
-import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from hdt.engine.simulator import Simulator
+from calibrate_model import run_calibration
 from hdt.config_loader import load_units_config
+from hdt.engine.simulator import Simulator
 from hdt.inputs.input_parser import InputParser
 from hdt.inputs.signal_normalizer import SignalNormalizer
-from calibrate_model import run_calibration
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = PACKAGE_ROOT.parent
@@ -59,8 +59,12 @@ if page == "Simulation":
     st.sidebar.header("Lifestyle Inputs")
     carbs = st.sidebar.number_input("Carbs (g)", min_value=0.0, step=1.0, key="carbs")
     fat = st.sidebar.number_input("Fat (g)", min_value=0.0, step=1.0, key="fat")
-    protein = st.sidebar.number_input("Protein (g)", min_value=0.0, step=1.0, key="protein")
-    sleep_hours = st.sidebar.number_input("Sleep duration (hours)", min_value=0.0, step=0.5, key="sleep")
+    protein = st.sidebar.number_input(
+        "Protein (g)", min_value=0.0, step=1.0, key="protein"
+    )
+    sleep_hours = st.sidebar.number_input(
+        "Sleep duration (hours)", min_value=0.0, step=0.5, key="sleep"
+    )
     intensity = st.sidebar.selectbox(
         "Workout intensity",
         ["None", "Light", "Moderate", "Intense"],
@@ -75,11 +79,11 @@ if page == "Simulation":
     # ---------------------------------------------------------------------------
     if submitted:
         level_map = {
-        "None": "rest",
-        "Light": "rest",
-        "Moderate": "moderate",
-        "Intense": "high",
-    }
+            "None": "rest",
+            "Light": "rest",
+            "Moderate": "moderate",
+            "Intense": "high",
+        }
         activity_level = level_map.get(intensity, "rest")
 
         external = {
@@ -91,17 +95,23 @@ if page == "Simulation":
         sim.step(external)
         snapshot = sim.history[-1]
         st.session_state.history.append(snapshot)
-        st.session_state.current_state = {name: unit.get_state() for name, unit in sim.units.items()}
+        st.session_state.current_state = {
+            name: unit.get_state() for name, unit in sim.units.items()
+        }
 
-    # Derived metrics
+        # Derived metrics
         glucose = snapshot.get("Liver", {}).get("liver_glucose", 0.0)
         cortisol = min(
             1.0,
             snapshot.get("BrainController", {}).get("stress_level", 0.0)
             * config.get("brain", {}).get("cortisol_threshold", 1.0),
         )
-        heart_rate = st.session_state.parsed_signals.get("BrainController", {}).get("heart_rate", 0)
-        sleep_quality = (1 - snapshot.get("SleepRegulationCenter", {}).get("sleep_drive", 0.0)) * 100
+        heart_rate = st.session_state.parsed_signals.get("BrainController", {}).get(
+            "heart_rate", 0
+        )
+        sleep_quality = (
+            1 - snapshot.get("SleepRegulationCenter", {}).get("sleep_drive", 0.0)
+        ) * 100
         glycogen = snapshot.get("Storage", {}).get("storage_glycogen", 0.0)
         sleep_drive = snapshot.get("SleepRegulationCenter", {}).get("sleep_drive", 0.0)
 
@@ -122,8 +132,13 @@ if page == "Simulation":
         st.subheader("Current Internal State")
         st.metric("Glucose", f"{st.session_state.metrics['glucose'][last_idx]:.2f}")
         st.metric("Cortisol", f"{st.session_state.metrics['cortisol'][last_idx]:.2f}")
-        st.metric("Heart Rate", f"{st.session_state.metrics['heart_rate'][last_idx]:.0f}")
-        st.metric("Sleep Quality", f"{st.session_state.metrics['sleep_quality'][last_idx]:.1f}")
+        st.metric(
+            "Heart Rate", f"{st.session_state.metrics['heart_rate'][last_idx]:.0f}"
+        )
+        st.metric(
+            "Sleep Quality",
+            f"{st.session_state.metrics['sleep_quality'][last_idx]:.1f}",
+        )
 
         glycogen_level = st.session_state.metrics["glycogen"][last_idx]
         max_gly = config.get("storage", {}).get("max_glycogen", 1.0)
@@ -147,11 +162,10 @@ if page == "Simulation":
         st.write("Enter inputs and submit to run the simulation.")
 else:
     st.sidebar.header("Calibration")
-    uploaded_sample = st.sidebar.file_uploader(
-        "Sample inputs (JSON)", type="json"
-    )
+    uploaded_sample = st.sidebar.file_uploader("Sample inputs (JSON)", type="json")
     uploaded_baseline = st.sidebar.file_uploader(
-        "Baseline values (YAML)", type=["yaml", "yml"],
+        "Baseline values (YAML)",
+        type=["yaml", "yml"],
     )
     run_btn = st.sidebar.button("Run Calibration")
 
