@@ -34,7 +34,7 @@ class LungReactor(BaseUnit):
         self._co2_in_rate = 0.0  # rate of CO₂ coming from tissues (mL/min)
 
         # Optional override for real-time control
-        self.override_inputs = None
+        self.override_inputs: Optional[Dict[str, Any]] = None
 
     def reset(self) -> None:
         """Reset accumulated CO₂ pool."""
@@ -58,13 +58,10 @@ class LungReactor(BaseUnit):
             "co2_remaining": self.co2_pool,
         }
 
-    def step(self, duration_min: int = 1, co2_in: float = 0.0) -> Dict[str, float]:
-        """
-        Execute one simulation step for the lungs.
-
-        Returns:
-            dict: Gas exchange outputs
-        """
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, float]:
+        """Execute one simulation step for the lungs."""
+        duration_min = int(inputs.get("duration_min", 1))
+        co2_in = float(inputs.get("co2_in", 0.0))
         if self.override_inputs is not None:
             o = self.override_inputs
             duration_min = o.get("duration_min", duration_min)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,9 +33,9 @@ app.add_middleware(
 
 # Simulation globals
 simulator: Optional[Simulator] = None
-latest_state: Optional[dict] = None
+latest_state: Optional[Dict[str, Any]] = None
 latest_recommendations: List[str] = []
-wearable_data: Optional[dict] = None
+wearable_data: Optional[Dict[str, Any]] = None
 
 # Parser for wearable data
 parser = InputParser(str(MAPPING_PATH))
@@ -74,14 +74,14 @@ def startup() -> None:
 
 
 @app.post("/run")
-def run_simulation(payload: RunRequest) -> dict:
+def run_simulation(payload: RunRequest) -> Dict[str, Any]:
     """Run one simulation step with the provided lifestyle inputs."""
     global latest_state, latest_recommendations
     if simulator is None:
         return {"error": "Simulator not initialized"}
 
     external = {
-        "meal": payload.meal.model_dump(),
+        "meal": payload.meal.dict(),
         "activity_level": payload.workout.activity_level if payload.workout else "rest",
         "hours_awake": max(0.0, 24 - (payload.sleep.hours if payload.sleep else 0.0)),
     }
@@ -93,10 +93,10 @@ def run_simulation(payload: RunRequest) -> dict:
 
 
 @app.post("/data")
-def ingest_data(data: AppleHealthInput) -> dict:
+def ingest_data(data: AppleHealthInput) -> Dict[str, Any]:
     """Store wearable data and update simulator input signals."""
     global wearable_data
-    wearable_data = data.model_dump(exclude_none=True)
+    wearable_data = data.dict(exclude_none=True)
 
     structured = parser.parse(wearable_data)
     normalized = normalizer.normalize(structured)
@@ -108,12 +108,12 @@ def ingest_data(data: AppleHealthInput) -> dict:
 
 
 @app.get("/state")
-def get_state() -> dict:
+def get_state() -> Dict[str, Any]:
     """Return the most recent simulator state."""
     return latest_state or {}
 
 
 @app.get("/recommendations")
-def get_recommendations() -> dict:
+def get_recommendations() -> Dict[str, Any]:
     """Return the latest lifestyle recommendations."""
     return {"recommendations": latest_recommendations}

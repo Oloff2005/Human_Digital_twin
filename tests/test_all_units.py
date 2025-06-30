@@ -98,12 +98,12 @@ class TestAllUnits(unittest.TestCase):
 
     def test_sleep_regulation(self):
         sleep = SleepRegulationCenter({})
-        out = sleep.step(circadian_phase=0.9, sleep_quality=0.8, cortisol=0.2)
+        out = sleep.step({"circadian_phase": 0.9, "sleep_quality": 0.8, "cortisol": 0.2})
         self.assertIn("melatonin", out)
         self.assertIn("recovery_score", out)
 
         sleep.set_sleep_drive_override(0.1)
-        override_out = sleep.step(circadian_phase=0.5, sleep_quality=0.5, cortisol=0.1)
+        override_out = sleep.step({"circadian_phase": 0.5, "sleep_quality": 0.5, "cortisol": 0.1})
         self.assertEqual(override_out["recovery_score"], round(1.0 - 0.1, 3))
 
     def test_pancreatic_valve(self):

@@ -39,7 +39,9 @@ class RuleEngine:
         if self.mode == "rule_based":
             if not self.rules_path:
                 raise ValueError("rules_path must be provided for rule_based mode")
-            self._engine = Recommender(self.rules_path, rule_version=self.rule_version)
+            self._engine: Optional[Recommender] = Recommender(
+                self.rules_path, rule_version=self.rule_version
+            )
         else:
             self._engine = None
 

@@ -20,7 +20,7 @@ class MuscleEffector(BaseUnit):
         self.hormones = {"insulin": 0.6, "cortisol": 0.2}
 
         # Optional override for simulator injections
-        self.override_inputs = None
+        self.override_inputs: Optional[Dict[str, Any]] = None
 
     def reset(self) -> None:
         """Reset internal substrate pools and settings."""
@@ -89,22 +89,22 @@ class MuscleEffector(BaseUnit):
             "muscle_ketones": -ketone_use,
         }
 
-    def step(
-        self,
-        inputs: Dict[str, float],
-        activity_level: str = "rest",
-        duration_min: int = 60,
-        hormones: Optional[Dict[str, float]] = None,
-    ) -> Dict[str, Any]:
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        activity_level = str(inputs.get("activity_level", "rest"))
+        duration_min = int(inputs.get("duration_min", 60))
+        substrates = inputs.get("inputs", {})
+        if not isinstance(substrates, dict):
+            substrates = {}
+        hormones = inputs.get("hormones")
         if self.override_inputs is not None:
             o = self.override_inputs
-            inputs = o.get("inputs", inputs)
+            substrates = o.get("inputs", substrates)
             activity_level = o.get("activity_level", activity_level)
             duration_min = o.get("duration_min", duration_min)
             hormones = o.get("hormones", hormones)
             self.override_inputs = None
 
-        return self.metabolize(inputs, activity_level, duration_min, hormones)
+        return self.metabolize(substrates, activity_level, duration_min, hormones)
 
     def metabolize(
         self,

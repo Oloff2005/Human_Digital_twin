@@ -13,13 +13,13 @@ class TestGutReactor(unittest.TestCase):
 
     def test_step_outputs(self):
         meal = {"carbs": 50, "fat": 20, "protein": 15, "fiber": 5, "water": 200}
-        result = self.gut.step(meal)
+        result = self.gut.step({"meal_input": meal})
         self.assertIn("absorbed", result)
         self.assertIn("residue", result)
 
     def test_conservation_of_mass(self):
         meal = {"carbs": 60, "fat": 25, "protein": 10, "fiber": 5, "water": 100}
-        result = self.gut.step(meal)
+        result = self.gut.step({"meal_input": meal})
         absorbed = result["absorbed"]
         residue = result["residue"]
 
@@ -30,7 +30,7 @@ class TestGutReactor(unittest.TestCase):
 
     def test_zero_glucose(self):
         meal = {"carbs": 0, "fat": 10, "protein": 5, "fiber": 0, "water": 50}
-        result = self.gut.step(meal)
+        result = self.gut.step({"meal_input": meal})
         absorbed = result["absorbed"]
         residue = result["residue"]
         self.assertEqual(absorbed["glucose"], 0)

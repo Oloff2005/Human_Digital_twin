@@ -9,23 +9,23 @@ class SleepRegulationCenter(BaseUnit):
     """Simulate circadian driven sleep pressure and recovery."""
 
     def __init__(self, config: Dict[str, Any]) -> None:
-        self.drive_gain = config.get("drive_gain", 0.05)
-        self.recovery_gain = config.get("recovery_gain", 0.1)
-        self.melatonin_amplitude = config.get("melatonin_amplitude", 1.0)
-        self.sleep_drive = config.get("initial_sleep_drive", 0.5)
+        self.drive_gain: float = float(config.get("drive_gain", 0.05))
+        self.recovery_gain: float = float(config.get("recovery_gain", 0.1))
+        self.melatonin_amplitude: float = float(config.get("melatonin_amplitude", 1.0))
+        self.sleep_drive: float = float(config.get("initial_sleep_drive", 0.5))
 
         # Optional compatibility state
-        self.hours_awake = 0
+        self.hours_awake: float = 0.0
 
-        self._override = None
+        self._override: Optional[float] = None
 
         # Optional override for real-time control
-        self.override_inputs = None
+        self.override_inputs: Optional[Dict[str, Any]] = None
 
     def reset(self) -> None:
         """Reset sleep drive and overrides."""
         self.sleep_drive = 0.5
-        self.hours_awake = 0
+        self.hours_awake = 0.0
         self._override = None
 
     # ------------------------------------------------------------------
@@ -45,7 +45,13 @@ class SleepRegulationCenter(BaseUnit):
         )
         cortisol = wearable_signals.get("cortisol", 0.0)
 
-        result = self.step(circadian_phase, sleep_quality, cortisol)
+        result = self.step(
+            {
+                "circadian_phase": circadian_phase,
+                "sleep_quality": sleep_quality,
+                "cortisol": cortisol,
+            }
+        )
         # include legacy outputs
         result["sleep_drive"] = round(self.sleep_drive, 3)
         result["sleep_signal"] = round(
@@ -71,9 +77,8 @@ class SleepRegulationCenter(BaseUnit):
         mel = 0.5 * (1 + math.cos(2 * math.pi * (phase - 0.5)))
         return min(1.0, max(0.0, mel * self.melatonin_amplitude))
 
-    def derivatives(
+    def compute_derivatives(
         self,
-        t: float,
         state: Dict[str, float],
         circadian_phase: float,
         sleep_quality: float,
@@ -92,12 +97,10 @@ class SleepRegulationCenter(BaseUnit):
     def set_state(self, state_dict: Dict[str, float]) -> None:
         self.sleep_drive = state_dict.get("sleep_drive", self.sleep_drive)
 
-    def step(
-        self,
-        circadian_phase: float,
-        sleep_quality: float = 1.0,
-        cortisol: float = 0.0,
-    ) -> Dict[str, float]:
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, float]:
+        circadian_phase = float(inputs.get("circadian_phase", 0.0))
+        sleep_quality = float(inputs.get("sleep_quality", 1.0))
+        cortisol = float(inputs.get("cortisol", 0.0))
         if self.override_inputs is not None:
             o = self.override_inputs
             circadian_phase = o.get("circadian_phase", circadian_phase)
@@ -110,8 +113,7 @@ class SleepRegulationCenter(BaseUnit):
         if self._override is not None:
             self.sleep_drive = self._override
         else:
-            deriv = self.derivatives(
-                0,
+            deriv = self.compute_derivatives(
                 {"sleep_drive": self.sleep_drive},
                 circadian_phase,
                 sleep_quality,

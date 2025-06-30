@@ -12,12 +12,12 @@ class TestSleepRegulationCenter(unittest.TestCase):
         self.sleep = SleepRegulationCenter({})
 
     def test_step_outputs(self):
-        result = self.sleep.step(circadian_phase=0.75, sleep_quality=0.8, cortisol=0.1)
+        result = self.sleep.step({"circadian_phase": 0.75, "sleep_quality": 0.8, "cortisol": 0.1})
         self.assertIn("melatonin", result)
         self.assertIn("recovery_score", result)
 
     def test_state_bounds(self):
-        result = self.sleep.step(circadian_phase=0.0, sleep_quality=1.0, cortisol=0.0)
+        result = self.sleep.step({"circadian_phase": 0.0, "sleep_quality": 1.0, "cortisol": 0.0})
         self.assertGreaterEqual(result["melatonin"], 0.0)
         self.assertLessEqual(result["melatonin"], 1.0)
         self.assertGreaterEqual(result["recovery_score"], 0.0)
@@ -25,7 +25,7 @@ class TestSleepRegulationCenter(unittest.TestCase):
 
     def test_override(self):
         self.sleep.set_sleep_drive_override(0.2)
-        result = self.sleep.step(circadian_phase=0.5)
+        result = self.sleep.step({"circadian_phase": 0.5})
         self.assertEqual(result["recovery_score"], round(1.0 - 0.2, 3))
         self.sleep.clear_override()
 

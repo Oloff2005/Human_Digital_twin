@@ -18,7 +18,7 @@ class BrainController(BaseUnit):
         self.time_of_day = 0  # hour 0–23
 
         # Optional output overrides
-        self._override = {}
+        self._override: Dict[str, Any] = {}
 
     def reset(self) -> None:
         """Reset internal controller state."""

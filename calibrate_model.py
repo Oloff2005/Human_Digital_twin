@@ -6,10 +6,17 @@ try:  # pragma: no cover - optional dependency
 except ModuleNotFoundError:  # pragma: no cover - optional dependency
     plt = None
 
+from typing import Any, Dict, List
+
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config, load_sim_params
 
-def create_plots(history, baseline, heart_rate_input, output_path):
+def create_plots(
+    history: List[Dict[str, Any]],
+    baseline: Dict[str, Any],
+    heart_rate_input: float,
+    output_path: Path,
+) -> None:
     """Generate calibration plots.
 
     Args:
@@ -64,7 +71,7 @@ def create_plots(history, baseline, heart_rate_input, output_path):
     fig.savefig(output_path)
     plt.close(fig)
 
-def run_calibration(save_logs: bool = True):
+def run_calibration(save_logs: bool = True) -> Dict[str, Any]:
     """Run a single calibration step and optionally save logs."""
     # Ensure log directory exists
     log_dir = Path("calibration_logs")
@@ -131,7 +138,7 @@ def run_calibration(save_logs: bool = True):
     return results
 
 
-def main():
+def main() -> None:
     run_calibration(save_logs=True)
 
 if __name__ == "__main__":

@@ -78,13 +78,13 @@ class Simulator:
             self.signals = {}
 
         # Stream map connections
-        self.streams: Dict[tuple, Stream] = {
+        self.streams: Dict[tuple[str, str], Stream] = {
             (conn.origin, conn.destination): Stream(conn.origin, conn.destination)
             for conn in STREAM_MAP
         }
 
         # Bidirectional stream managers
-        self.bidir_streams: Dict[frozenset, BidirectionalStreamManager] = {}
+        self.bidir_streams: Dict[frozenset[str], BidirectionalStreamManager] = {}
         for pair in BIDIRECTIONAL_PAIRS:
             manager = BidirectionalStreamManager(
                 pair.a,
@@ -134,10 +134,12 @@ class Simulator:
             # Discrete stepping sequence mirroring physiological flow
             # ------------------------------------------------------------------
             brain_out = self.units["BrainController"].step(
-                muscle_signals=external_inputs.get("muscle_signals", {}),
-                gut_signals=external_inputs.get("gut_signals", {}),
-                wearable_signals=self.signals.get("BrainController", {}),
-                time_of_day=self.time.hour,
+                {
+                    "muscle_signals": external_inputs.get("muscle_signals", {}),
+                    "gut_signals": external_inputs.get("gut_signals", {}),
+                    "wearable_signals": self.signals.get("BrainController", {}),
+                    "time_of_day": self.time.hour,
+                }
             )
             self.streams[("BrainController", "HormoneRouter")].push(
                 brain_out, self.time.minute
@@ -166,11 +168,11 @@ class Simulator:
 
             gut_inputs = external_inputs.get("meal", {})
             gut_out = self.units["Gut"].step(
-                meal_input=gut_inputs, duration_min=60, hormones=hormone_out
+                {"meal_input": gut_inputs, "duration_min": 60, "hormones": hormone_out}
             )
             self.streams[("Gut", "Liver")].push(gut_out["absorbed"], self.time.minute)
 
-            colon_out = self.units["Colon"].step(gut_out["residue"].get("fiber", 0))
+            colon_out = self.units["Colon"].step({"fiber_input": gut_out["residue"].get("fiber", 0)})
 
             portal_inputs = {}
             for payload in self.streams[("Gut", "Liver")].step(self.time.minute):
@@ -203,7 +205,7 @@ class Simulator:
             ):
                 if isinstance(payload, dict):
                     cv_inputs.update(payload)
-            cardio_out = self.units["HeartCirculation"].step(cv_inputs)
+            cardio_out = self.units["HeartCirculation"].step({"absorbed_nutrients": cv_inputs})
 
             muscle_inputs = {
                 "glucose": cardio_out["to_systemic"].get("glucose", 0),
@@ -222,7 +224,13 @@ class Simulator:
             )
 
             kidney_out = self.units["Kidney"].step(
-                {"urea": 5.0, "water": cardio_out["to_systemic"].get("water", 0)}
+                {
+                    "blood_input": {
+                        "urea": 5.0,
+                        "water": cardio_out["to_systemic"].get("water", 0),
+                    },
+                    "duration_min": 60,
+                }
             )
 
             skin_out = self.units["Skin"].regulate(

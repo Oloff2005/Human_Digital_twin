@@ -77,9 +77,12 @@ class HeartCirculation(BaseUnit):
             "delay_minutes": self.transport_delay,
         }
 
-    def step(self, absorbed_nutrients: Dict[str, float]) -> Dict[str, Any]:
-        """Wrapper for :meth:`distribute` for unit operation API."""
-        return self.distribute(absorbed_nutrients)
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Wrapper for :meth:`distribute` using dict input."""
+        absorbed = inputs.get("absorbed_nutrients", {})
+        if not isinstance(absorbed, dict):
+            absorbed = {}
+        return self.distribute({k: float(v) for k, v in absorbed.items()})
 
     # ------------------------------------------------------------------
     # ODE integration helpers

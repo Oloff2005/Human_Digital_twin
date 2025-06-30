@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import math
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, cast
 
 from utils.logging_utils import setup_logger
 
@@ -48,10 +48,12 @@ class InputParser:
             with open(raw_data, "r") as f:
                 raw_data = json.load(f)
 
+        raw_dict = cast(Dict[str, Any], raw_data)
+
         parsed_signals: Dict[str, Dict[str, Any]] = {}
 
         for signal, targets in self.mapping.items():
-            value = raw_data.get(signal)
+            value = raw_dict.get(signal)
             if value is None:
                 logger.warning("%s missing or None; skipping", signal)
                 continue

@@ -31,7 +31,7 @@ class LiverMetabolicRouter(BaseUnit):
         self._glucagon = 0.5
 
         # Optional override for real-time control
-        self.override_inputs = None
+        self.override_inputs: Optional[Dict[str, Any]] = None
 
     def reset(self) -> None:
         """Reset internal liver state."""
@@ -143,13 +143,13 @@ class LiverMetabolicRouter(BaseUnit):
             },
         }
 
-    def step(
-        self,
-        portal_input: Dict[str, float],
-        microbiome_input: Optional[Dict[str, float]] = None,
-        mobilized_reserves: Optional[Dict[str, float]] = None,
-        signals: Optional[Dict[str, float]] = None,
-    ) -> Dict[str, Any]:
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        portal_input = inputs.get("portal_input", {})
+        if not isinstance(portal_input, dict):
+            portal_input = {}
+        microbiome_input = inputs.get("microbiome_input")
+        mobilized_reserves = inputs.get("mobilized_reserves")
+        signals = inputs.get("signals")
         if self.override_inputs is not None:
             o = self.override_inputs
             portal_input = o.get("portal_input", portal_input)

@@ -26,7 +26,7 @@ class GutReactor(BaseUnit):
         self.water = 0.0
 
         # Optional override for real-time control via the simulator
-        self.override_inputs = None
+        self.override_inputs: Optional[Dict[str, Any]] = None
 
     def reset(self) -> None:
         """Reset internal nutrient pools."""
@@ -132,12 +132,12 @@ class GutReactor(BaseUnit):
 
         return {"absorbed": absorbed, "residue": residue}
 
-    def step(
-        self,
-        meal_input: Dict[str, float],
-        duration_min: int = 60,
-        hormones: Optional[Dict[str, float]] = None,
-    ) -> Dict[str, Dict[str, float]]:
+    def step(self, inputs: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
+        meal_input = inputs.get("meal_input", {})
+        if not isinstance(meal_input, dict):
+            meal_input = {}
+        duration_min = int(inputs.get("duration_min", 60))
+        hormones = inputs.get("hormones")
         if self.override_inputs is not None:
             o = self.override_inputs
             meal_input = o.get("meal_input", meal_input)

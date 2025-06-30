@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Dict, Iterable
 
-import numpy as np
-
 
 def calibrate(
     inputs: Iterable[float], observed_outputs: Iterable[float], *, adjust: bool = False
@@ -23,14 +21,15 @@ def calibrate(
     Dict[str, float]
         Dictionary containing ``mae`` and ``rmse``.
     """
-    predicted = np.asarray(list(inputs), dtype=float)
-    observed = np.asarray(list(observed_outputs), dtype=float)
+    predicted = [float(x) for x in inputs]
+    observed = [float(x) for x in observed_outputs]
 
-    if predicted.shape != observed.shape:
+    if len(predicted) != len(observed):
         raise ValueError("inputs and observed_outputs must have the same shape")
 
-    mae = float(np.mean(np.abs(predicted - observed)))
-    rmse = float(np.sqrt(np.mean((predicted - observed) ** 2)))
+    diffs = [abs(p - o) for p, o in zip(predicted, observed)]
+    mae = sum(diffs) / len(diffs)
+    rmse = (sum((p - o) ** 2 for p, o in zip(predicted, observed)) / len(diffs)) ** 0.5
 
     log_line = f"{datetime.now().isoformat()}\tMAE={mae:.4f}\tRMSE={rmse:.4f}\n"
     with open("calibration_log.txt", "a") as log_file:
