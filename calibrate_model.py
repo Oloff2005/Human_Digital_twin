@@ -3,12 +3,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 import types
 
-try:  # pragma: no cover - optional dependency
-    import matplotlib.pyplot as plt_module
-except ModuleNotFoundError:  # pragma: no cover - optional dependency
-    plt_module = None
+plt_module: Optional[types.ModuleType] = None
 
-plt_module: Optional[types.ModuleType]
+try:  # pragma: no cover - optional dependency
+    import matplotlib.pyplot as plt  # import as temporary name
+    plt_module = plt
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    pass
 
 from hdt.engine.simulator import Simulator
 from hdt.config_loader import load_units_config, load_sim_params
