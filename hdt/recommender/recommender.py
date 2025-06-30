@@ -2,6 +2,7 @@
 
 try:
     import yaml  # type: ignore
+
     yaml_lib = yaml
 except ModuleNotFoundError:  # pragma: no cover
     yaml_lib = None

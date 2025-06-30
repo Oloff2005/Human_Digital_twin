@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Tuple, cast
 
 try:
     import yaml  # type: ignore
+
     yaml_lib = yaml
 except ModuleNotFoundError:  # pragma: no cover - optional dependency may be absent
     yaml_lib = None
