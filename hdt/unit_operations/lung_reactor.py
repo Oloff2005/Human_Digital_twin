@@ -1,3 +1,5 @@
+"""Model of lung gas exchange with optional ODE behavior."""
+
 from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit

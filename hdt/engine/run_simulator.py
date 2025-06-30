@@ -1,3 +1,5 @@
+"""Helper to load configuration and run a simulation instance."""
+
 from __future__ import annotations
 
 import json

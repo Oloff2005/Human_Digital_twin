@@ -1,3 +1,5 @@
+"""Static map describing connections between unit operations."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

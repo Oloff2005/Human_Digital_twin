@@ -1,3 +1,5 @@
+"""Simple utility to track simulation time in minutes, hours, and days."""
+
 from __future__ import annotations
 
 from typing import Dict

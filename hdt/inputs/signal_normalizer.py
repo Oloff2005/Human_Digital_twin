@@ -1,3 +1,5 @@
+"""Normalize parsed wearable signals for downstream units."""
+
 from __future__ import annotations
 
 import math
@@ -13,7 +15,6 @@ class SignalNormalizer:
         """
         Optionally initialize normalization parameters or scaling coefficients.
         """
-        pass
 
     def normalize(
         self, parsed_signals: Dict[str, Dict[str, Any]]

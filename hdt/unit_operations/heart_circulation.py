@@ -1,3 +1,5 @@
+"""Simulates cardiovascular distribution of nutrients and waste."""
+
 from typing import Any, Dict
 
 from .base_unit import BaseUnit

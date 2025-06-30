@@ -1,9 +1,11 @@
+"""Minimal calibration helper used in unit tests."""
+
 from datetime import datetime
 from typing import Dict, Iterable
 
 
 def calibrate(
-    inputs: Iterable[float], observed_outputs: Iterable[float], *, adjust: bool = False
+    inputs: Iterable[float], observed_outputs: Iterable[float], *, _adjust: bool = False
 ) -> Dict[str, float]:
     """Compare predicted outputs to observed values and compute error metrics.
 
@@ -32,13 +34,10 @@ def calibrate(
     rmse = (sum((p - o) ** 2 for p, o in zip(predicted, observed)) / len(diffs)) ** 0.5
 
     log_line = f"{datetime.now().isoformat()}\tMAE={mae:.4f}\tRMSE={rmse:.4f}\n"
-    with open("calibration_log.txt", "a") as log_file:
+    with open("calibration_log.txt", "a", encoding="utf-8") as log_file:
         log_file.write(log_line)
 
-    if adjust:
-        # Placeholder for parameter adjustment logic. In a real implementation
-        # this would update model parameters based on the computed errors.
-        pass
+
 
     return {"mae": mae, "rmse": rmse}
 

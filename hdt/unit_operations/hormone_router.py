@@ -1,3 +1,5 @@
+"""Resolve dominance relationships between multiple hormone signals."""
+
 from typing import Any, Dict, List, Optional
 
 from .base_unit import BaseUnit
@@ -19,13 +21,12 @@ class HormoneRouter(BaseUnit):
 
     def reset(self) -> None:
         """No dynamic state to reset."""
-        pass
 
     def get_state(self) -> Dict[str, Any]:
         return {}
 
     def set_state(self, state_dict: Dict[str, Any]) -> None:
-        pass
+        """Stateless unit; nothing to set."""
 
     def resolve(self, hormone_outputs: Dict[str, float]) -> Dict[str, float]:
         """

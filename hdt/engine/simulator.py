@@ -1,3 +1,5 @@
+"""Main simulator coordinating all unit operations and time progression."""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,6 +1,6 @@
+"""Streamlit web app for interactive Human Digital Twin demos."""
+
 import json
-import os
-import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt

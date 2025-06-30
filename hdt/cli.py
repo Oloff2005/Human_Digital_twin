@@ -1,3 +1,5 @@
+"""Command line interface for running HDT simulations."""
+
 import argparse
 import json
 from pathlib import Path

@@ -1,3 +1,5 @@
+"""Central control unit coordinating hormones and behavior."""
+
 from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit

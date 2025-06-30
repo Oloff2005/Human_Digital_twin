@@ -1,3 +1,5 @@
+"""Data structures for passing information between unit operations."""
+
 from __future__ import annotations
 
 from collections import deque

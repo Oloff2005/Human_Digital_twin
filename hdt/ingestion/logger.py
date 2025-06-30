@@ -1,3 +1,5 @@
+"""Simple JSON logging utilities for ingestion examples."""
+
 import json
 import os
 from datetime import datetime
@@ -17,10 +19,10 @@ def log_health_snapshot(raw_data: Dict[str, Any], sim_result: Dict[str, Any]) ->
     }
 
     if not os.path.exists(HISTORY_PATH):
-        with open(HISTORY_PATH, "w") as f:
+        with open(HISTORY_PATH, "w", encoding="utf-8") as f:
             json.dump([entry], f, indent=2)
     else:
-        with open(HISTORY_PATH, "r+") as f:
+        with open(HISTORY_PATH, "r+", encoding="utf-8") as f:
             data = json.load(f)
             data.append(entry)
             f.seek(0)

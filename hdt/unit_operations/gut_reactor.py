@@ -1,3 +1,5 @@
+"""Simplified gastrointestinal digestion and absorption model."""
+
 from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit

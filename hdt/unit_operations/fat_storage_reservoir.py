@@ -1,3 +1,5 @@
+"""ODE-compatible model of glycogen and fat energy storage."""
+
 from typing import Any, Dict, Optional
 
 from .base_unit import BaseUnit
