@@ -17,6 +17,18 @@ Human Digital Twin is an AI-powered platform designed to model and optimize huma
    git clone https://github.com/Oloff2005/Human_Digital_twin.git
 Install required Python packages:
 pip install -r requirements.txt
+
+### Running Tests
+1. Install additional testing tools:
+   ```bash
+   pip install pytest pytest-cov
+   ```
+2. Generate an HTML coverage report:
+   ```bash
+   make coverage
+   ```
+   The report will be saved to `htmlcov/index.html`.
+
 Usage
 
 Connect your wearable device to the app.

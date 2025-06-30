@@ -8,3 +8,5 @@ scipy
 pyyaml
 seaborn==0.13.2
 pandas
+pytest
+pytest-cov
