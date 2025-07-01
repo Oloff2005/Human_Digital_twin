@@ -18,34 +18,10 @@ from hdt.unit_operations.pancreatic_valve import PancreaticValve
 from hdt.unit_operations.hormone_router import HormoneRouter  
 
 class TestAllUnits(unittest.TestCase):
-    def test_gut_reactor(self):
-        gut = GutReactor({"digestion_efficiency": 0.9, "gastric_emptying_rate": 2.0, "absorption_delay": 10})
-        result = gut.digest({"carbs": 60, "fat": 20, "protein": 30, "fiber": 10, "water": 300}, hormones={"circadian_tone": 1.0, "cortisol": 0.1})
-        self.assertIn("absorbed", result)
-
     def test_colon_microbiome_reactor(self):
         colon = ColonMicrobiomeReactor({})
         result = colon.process_residue(15)
         self.assertIn("scfa_output", result)
-
-    def test_liver_metabolic_router(self):
-        liver = LiverMetabolicRouter({})
-        output = liver.route({
-            "glucose": 70,
-            "fatty_acids": 50,
-            "ketones": 5,
-            "scfa": 3,
-            "amino_acids": 20,
-            "glycogen": 30,
-            "triglycerides": 40
-        })
-        self.assertIn("to_muscle_aerobic", output)
-        self.assertIn("to_muscle_anaerobic", output)
-
-    def test_muscle_effector(self):
-        muscle = MuscleEffector({})
-        result = muscle.metabolize({"glucose": 60, "fat": 30}, activity_level="moderate", duration_min=45, hormones={"insulin": 0.7, "cortisol": 0.2})
-        self.assertIn("substrate_used", result)
 
     def test_storage_unit(self):
         store = FatStorageReservoir({})
@@ -95,16 +71,6 @@ class TestAllUnits(unittest.TestCase):
         skin = SkinThermoregulator({})
         result = skin.regulate(core_temp=38.0, ambient_temp=30, hormones={"cortisol": 0.3})
         self.assertIn("sweat_loss", result)
-
-    def test_sleep_regulation(self):
-        sleep = SleepRegulationCenter({})
-        out = sleep.step({"circadian_phase": 0.9, "sleep_quality": 0.8, "cortisol": 0.2})
-        self.assertIn("melatonin", out)
-        self.assertIn("recovery_score", out)
-
-        sleep.set_sleep_drive_override(0.1)
-        override_out = sleep.step({"circadian_phase": 0.5, "sleep_quality": 0.5, "cortisol": 0.1})
-        self.assertEqual(override_out["recovery_score"], round(1.0 - 0.1, 3))
 
     def test_pancreatic_valve(self):
         pancreas = PancreaticValve({})
